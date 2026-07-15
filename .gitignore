@@ -1,0 +1,49 @@
+# Maven build output
+target/
+
+# Internal tests
+forecastr/**/src/test/
+
+# Compiled artifacts outside target/
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+
+# Logs and JVM crash dumps
+*.log
+hs_err_pid*
+replay_pid*
+
+# Local secrets and overrides
+.env
+.env.*
+*.local
+
+# H2 file databases
+*.mv.db
+*.trace.db
+*.lock.db
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.agents/
+.vscode/
+*.swp
+*~
+
+# internal
+task/
+docs/
+
+# OS
+.DS_Store
+Thumbs.db
+AGENTS.md
