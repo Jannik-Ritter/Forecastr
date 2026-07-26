@@ -1,5 +1,13 @@
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    max-connections: 10000
+    accept-count: 2000
+    connection-timeout: 5s
+    keep-alive-timeout: 30s
 spring:
   datasource:
     url: jdbc:h2:mem:forecastr;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000
@@ -9,9 +17,21 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: create-drop
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 100
   h2:
     console:
       enabled: true
   jackson:
     serialization:
       write-dates-as-timestamps: false
+forecastr:
+  fee-rate: 0.05
+  resolver-delay-ms: 10000
+  archive-delay-ms: 60000
+  archive-retention: PT60M
+logging:
+  level:
+    de.eva.forecastr: INFO
