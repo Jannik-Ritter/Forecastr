@@ -25,14 +25,14 @@ public final class EventCsvRowParser {
       String rawResolutionOffset = row.getOrDefault("plannedResolutionOffsetMin", "").trim();
       if ((planned == PlannedResolution.UNRESOLVABLE) != rawResolutionOffset.isEmpty())
         throw new IllegalArgumentException("resolution offset must be empty iff UNRESOLVABLE");
-      Instant createdAt = importedAt;
-      Instant closesAt = importedAt.plus(closesOffset - createdOffset, ChronoUnit.MINUTES);
+      Instant createdAt = importedAt.plus(createdOffset, ChronoUnit.MINUTES);
+      Instant closesAt = importedAt.plus(closesOffset, ChronoUnit.MINUTES);
       Instant plannedAt = null;
       if (planned != PlannedResolution.UNRESOLVABLE) {
         long resolutionOffset = Long.parseLong(rawResolutionOffset);
         if (resolutionOffset < createdOffset || resolutionOffset > closesOffset)
           throw new IllegalArgumentException("resolution offset must be within event lifetime");
-        plannedAt = importedAt.plus(resolutionOffset - createdOffset, ChronoUnit.MINUTES);
+        plannedAt = importedAt.plus(resolutionOffset, ChronoUnit.MINUTES);
       }
       return new MarketEvent(id, question.trim(), createdAt, closesAt, planned, plannedAt);
     } catch (NumberFormatException | NullPointerException e) {
