@@ -1,0 +1,9 @@
+username,initialBalance,isAdmin
+alice,100.00,false
+bob,250.00,false
+carla,180.00,false
+deniz,320.00,false
+erik,150.00,true
+jannik,200.00,true
+jannis,200.00,true
+fatima,500.00,false
