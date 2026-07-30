@@ -1,0 +1,28 @@
+id,question,createdOffsetMin,closesOffsetMin,plannedResolution,plannedResolutionOffsetMin
+1,"Regnet es heute um 18:00 in Leipzig?",0,120,YES,2
+2,"Erreicht der MDR-Beitrag 10000 Aufrufe bis Mitternacht?",0,600,UNRESOLVABLE,
+3,"Fällt die Temperatur in Dresden in einer Stunde unter 5 Grad?",0,180,NO,3
+4,"Verspätet sich der ICE 1555 heute um mehr als zehn Minuten?",0,90,YES,4
+5,"Gewinnt Leipzig das heutige Heimspiel?",0,300,NO,5
+6,"Steigt der Elbpegel bis heute Abend?",0,240,YES,60
+7,"Wird die Mensa heute vor 14 Uhr ausverkauft sein?",0,180,NO,90
+8,"Erreicht das Campusfest heute 1000 Gäste?",0,360,YES,240
+9,"Fällt heute eine Straßenbahnlinie in Leipzig aus?",0,480,UNRESOLVABLE,
+10,"Wird es heute in Chemnitz schneien?",0,720,NO,600
+11,"Schließt der Zoo heute wetterbedingt früher?",0,540,NO,480
+12,"Veröffentlicht die Universität heute eine Pressemitteilung?",0,600,YES,500
+13,"Überschreitet die Windgeschwindigkeit heute 50 km/h?",0,420,UNRESOLVABLE,
+14,"Gewinnt Dresden das nächste Eishockeyspiel?",0,720,YES,700
+15,"Startet das Konzert heute pünktlich?",0,300,NO,290
+16,"Ist der Augustusplatz heute Abend gesperrt?",0,600,YES,550
+17,"Fährt die S-Bahn heute im Zehn-Minuten-Takt?",0,480,NO,400
+18,"Erreicht die Luftqualität heute den Index Gut?",0,720,UNRESOLVABLE,
+19,"Wird die Bibliothek heute länger geöffnet bleiben?",0,360,NO,300
+20,"Gibt es heute eine Unwetterwarnung für Sachsen?",0,900,YES,800
+21,"Übersteigt der Bitcoin-Kurs heute sein Tageshoch?",0,1200,UNRESOLVABLE,
+22,"Erscheint heute eine neue Folge des Podcasts?",0,1440,YES,1200
+23,"Erreicht der Livestream heute 500 Zuschauer?",0,240,NO,180
+24,"Wird der Wochenmarkt heute vollständig öffnen?",0,300,YES,200
+25,"Bleibt die Autobahn A14 heute ohne Vollsperrung?",0,720,NO,650
+26,"Diese ungültige Veranstaltung dauert zu lange?",0,1500,NO,90
+27,"Diese Frage hat absichtlich kein Fragezeichen",0,120,YES,60
