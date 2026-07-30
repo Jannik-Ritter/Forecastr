@@ -90,6 +90,10 @@ public class CsvImportService implements EventSource {
       for (CSVRecord record : csv) {
         try {
           MarketEvent event = parser.parse(record.toMap(), importedAt);
+          if (eventRepository.existsById(event.getId())) {
+            skipped++;
+            continue;
+          }
           eventRepository.save(event);
           accepted++;
           logService.log(LogType.EVENT_IMPORT, Map.of("eventId", event.getId(), "accepted", true));
