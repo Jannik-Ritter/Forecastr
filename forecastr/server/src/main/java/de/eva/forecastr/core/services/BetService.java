@@ -53,7 +53,7 @@ public class BetService {
     }
     MarketEvent event =
         eventRepository
-            .findById(eventId)
+            .findLocked(eventId)
             .orElseThrow(() -> ForecastrException.notFound("Event not found"));
     User user =
         userRepository
@@ -63,7 +63,9 @@ public class BetService {
       throw ForecastrException.notFound("User not found");
     }
     Instant now = clock.instant();
-    if (event.getStatus() != EventStatus.OPEN) {
+    if (event.getStatus() != EventStatus.OPEN
+        || now.isBefore(event.getCreatedAt())
+        || !now.isBefore(event.getClosesAt())) {
       throw ForecastrException.conflict("Event is not open for betting");
     }
     Wallet wallet =
