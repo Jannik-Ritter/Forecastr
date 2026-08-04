@@ -1,6 +1,7 @@
 package de.eva.forecastr.rest.restComponents;
 
 import de.eva.forecastr.core.models.User;
+import de.eva.forecastr.core.services.BetService;
 import de.eva.forecastr.core.services.UserService;
 import de.eva.forecastr.core.services.WalletService;
 import de.eva.forecastr.rest.createRecords.CreateUserRequest;
@@ -26,10 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
   private final UserService userService;
   private final WalletService walletService;
+  private final BetService betService;
 
-  public UserController(UserService userService, WalletService walletService) {
+  public UserController(
+      UserService userService, WalletService walletService, BetService betService) {
     this.userService = userService;
     this.walletService = walletService;
+    this.betService = betService;
   }
 
   @GetMapping
@@ -85,4 +89,8 @@ public class UserController {
     return RestMapper.wallet(walletService.getBalance(id));
   }
 
+  @GetMapping("/{id}/bets")
+  List<BetResponse> getBets(@PathVariable Long id) {
+    return betService.getBetsByUser(id).stream().map(RestMapper::bet).toList();
+  }
 }

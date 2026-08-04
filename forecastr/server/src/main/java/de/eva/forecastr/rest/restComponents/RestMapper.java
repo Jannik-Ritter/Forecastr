@@ -1,5 +1,6 @@
 package de.eva.forecastr.rest.restComponents;
 
+import de.eva.forecastr.core.models.Bet;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.Wallet;
 
@@ -13,6 +14,19 @@ public final class RestMapper {
 
   public static BalanceResponse wallet(Wallet wallet) {
     return new BalanceResponse(wallet.getUserId(), wallet.getBalance(), "EUR", wallet.getVersion());
+  }
+
+  public static BetResponse bet(Bet bet) {
+    return new BetResponse(
+        bet.getId(),
+        bet.getUserId(),
+        bet.getEventId(),
+        bet.getOutcome(),
+        bet.getStake(),
+        bet.getPlacedAt(),
+        bet.getStatus(),
+        bet.getPayoutAmount(),
+        bet.getFeeAmount());
   }
 
 }
