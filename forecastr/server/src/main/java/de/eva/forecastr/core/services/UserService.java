@@ -5,6 +5,8 @@ import de.eva.forecastr.core.models.Money;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.Wallet;
 import de.eva.forecastr.core.models.exceptions.ForecastrException;
+import de.eva.forecastr.repository.BetRepository;
+import de.eva.forecastr.repository.EventRepository;
 import de.eva.forecastr.repository.UserRepository;
 import de.eva.forecastr.repository.WalletRepository;
 import java.math.BigDecimal;
@@ -22,16 +24,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
   private final UserRepository userRepository;
   private final WalletRepository walletRepository;
+  private final BetRepository betRepository;
+  private final EventRepository eventRepository;
   private final LogService logService;
   private final Clock clock;
 
   public UserService(
       UserRepository userRepository,
       WalletRepository walletRepository,
+      BetRepository betRepository,
+      EventRepository eventRepository,
       LogService logService,
       Clock clock) {
     this.userRepository = userRepository;
     this.walletRepository = walletRepository;
+    this.betRepository = betRepository;
+    this.eventRepository = eventRepository;
     this.logService = logService;
     this.clock = clock;
   }
@@ -96,11 +104,16 @@ public class UserService {
 
   @Transactional
   public void deleteUser(Long userId) {
+    List<Long> eventIds = betRepository.findEventIdsByUserId(userId);
+    if (!eventIds.isEmpty()) {
+      eventRepository.findAllLocked(eventIds);
+    }
     User user = requireActiveUser(userRepository.findLocked(userId).orElse(null));
     Wallet wallet =
         walletRepository
             .findLocked(userId)
             .orElseThrow(() -> ForecastrException.notFound("Wallet not found"));
+    betRepository.deleteByUserId(userId);
     walletRepository.delete(wallet);
     user.softDelete(clock.instant());
     userRepository.save(user);
