@@ -1,5 +1,6 @@
 package de.eva.forecastr.clients;
 
+import de.eva.forecastr.clients.commandHandler.EventCommandHandler;
 import de.eva.forecastr.clients.commandHandler.UserCommandHandler;
 import de.eva.forecastr.clients.commandHandler.WalletCommandHandler;
 import de.eva.forecastr.clients.formatter.ConsoleFormatter;
@@ -15,6 +16,7 @@ public final class ConsoleClient {
   private final ConsoleInput input;
   private final PrintStream output;
   private final UserCommandHandler userHandler;
+  private final EventCommandHandler eventHandler;
   private final WalletCommandHandler walletHandler;
 
   public ConsoleClient(ForecastrGateway gateway) {
@@ -27,6 +29,7 @@ public final class ConsoleClient {
     this.input = new ConsoleInput(input, output);
     this.output = output;
     this.userHandler = new UserCommandHandler(gateway, session, this.input, output);
+    this.eventHandler = new EventCommandHandler(gateway, session, this.input, output);
     this.walletHandler = new WalletCommandHandler(gateway, session, this.input, output);
   }
 
@@ -66,13 +69,17 @@ public final class ConsoleClient {
         ConsoleFormatter.section(output, "Hauptmenü");
         output.println("  Angemeldet als  " + session.user().username());
         output.println("  Guthaben        " + ConsoleFormatter.money(session.balance().balance()));
-        output.println("  [1] Wallet");
-        output.println("  [2] Profil");
+        output.println("  [1] Feed");
+        output.println("  [2] Suchen");
+        output.println("  [3] Wallet");
+        output.println("  [4] Profil");
         output.println("  [9] Ausloggen");
         output.println("  [0] Beenden");
         switch (input.askChoice("\nAuswahl > ")) {
-          case "1" -> walletHandler.wallet();
-          case "2" -> isRunning = userHandler.profile();
+          case "1" -> eventHandler.feed();
+          case "2" -> eventHandler.search();
+          case "3" -> walletHandler.wallet();
+          case "4" -> isRunning = userHandler.profile();
           case "9" -> {
             session.logout();
             isRunning = false;
