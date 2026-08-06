@@ -1,6 +1,7 @@
 package de.eva.forecastr.rest.restComponents;
 
 import de.eva.forecastr.core.models.Bet;
+import de.eva.forecastr.core.models.EventSnapshot;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.Wallet;
 
@@ -27,6 +28,19 @@ public final class RestMapper {
         bet.getStatus(),
         bet.getPayoutAmount(),
         bet.getFeeAmount());
+  }
+
+  public static EventResponse event(EventSnapshot event) {
+    return new EventResponse(
+        event.id(),
+        event.question(),
+        event.createdAt(),
+        event.closesAt(),
+        event.settlementAt(),
+        event.status(),
+        event.resolvedAt(),
+        event.yesPool(),
+        event.noPool());
   }
 
 }
