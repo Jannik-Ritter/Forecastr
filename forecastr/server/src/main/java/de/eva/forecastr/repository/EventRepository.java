@@ -35,4 +35,11 @@ public interface EventRepository
           + " e.closesAt > :now order by e.id")
   List<MarketEvent> findBettable(@Param("now") Instant now);
 
+  @Query(
+      "select e.id from MarketEvent e where e.status ="
+          + " de.eva.forecastr.core.models.EventStatus.OPEN and ((e.plannedResolution <>"
+          + " de.eva.forecastr.core.models.PlannedResolution.UNRESOLVABLE and"
+          + " e.plannedResolutionAt <= :now) or e.closesAt <= :now)")
+  List<Long> findDueIds(@Param("now") Instant now);
+
 }
