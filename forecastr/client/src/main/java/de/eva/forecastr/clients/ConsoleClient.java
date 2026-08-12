@@ -42,10 +42,12 @@ public final class ConsoleClient {
       // A closed input stream ends the interactive client quietly.
     } catch (ClientException exception) {
       output.println("Fehler: " + exception.getMessage());
+    } catch (Exception exception) {
+      output.println("Die Live-Verbindung konnte nicht sauber geschlossen werden.");
     }
   }
 
-  private void runSessions() {
+  private void runSessions() throws Exception {
     while (true) {
       User user = userHandler.chooseUser();
       if (user == null) {
@@ -54,7 +56,10 @@ public final class ConsoleClient {
       session.user(user);
       gateway.selectUser(user.id());
       session.balance(gateway.balance(user.id()));
-      mainMenu();
+      try (AutoCloseable liveUpdates =
+          gateway.liveUpdates(user.id(), update -> session.notify(ConsoleFormatter.live(update)))) {
+        mainMenu();
+      }
       if (session.user() != null) {
         return;
       }
@@ -64,17 +69,10 @@ public final class ConsoleClient {
   private void mainMenu() {
     boolean isRunning = true;
     while (isRunning) {
+      flushNotifications();
       try {
         session.balance(gateway.balance(session.user().id()));
-        ConsoleFormatter.section(output, "Hauptmenü");
-        output.println("  Angemeldet als  " + session.user().username());
-        output.println("  Guthaben        " + ConsoleFormatter.money(session.balance().balance()));
-        output.println("  [1] Feed");
-        output.println("  [2] Suchen");
-        output.println("  [3] Wallet");
-        output.println("  [4] Profil");
-        output.println("  [9] Ausloggen");
-        output.println("  [0] Beenden");
+        printMainMenu();
         switch (input.askChoice("\nAuswahl > ")) {
           case "1" -> eventHandler.feed();
           case "2" -> eventHandler.search();
@@ -90,6 +88,26 @@ public final class ConsoleClient {
       } catch (ClientException exception) {
         output.println("Fehler: " + exception.getMessage());
       }
+    }
+  }
+
+  private void printMainMenu() {
+    ConsoleFormatter.section(output, "Hauptmenü");
+    output.println("  Angemeldet als  " + session.user().username());
+    output.println("  Guthaben        " + ConsoleFormatter.money(session.balance().balance()));
+    output.println();
+    output.println("  [1] Feed");
+    output.println("  [2] Suchen");
+    output.println("  [3] Wallet");
+    output.println("  [4] Profil");
+    output.println("  [9] Ausloggen");
+    output.println("  [0] Beenden");
+  }
+
+  private void flushNotifications() {
+    String message;
+    while ((message = session.nextNotification()) != null) {
+      output.println("\nHinweis: " + message);
     }
   }
 }

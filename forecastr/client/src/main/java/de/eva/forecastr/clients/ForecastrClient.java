@@ -3,6 +3,7 @@ package de.eva.forecastr.clients;
 import de.eva.forecastr.core.interfaces.ForecastrGateway;
 import de.eva.forecastr.rest.CommunicationHandler;
 import de.eva.forecastr.rest.RestForecastrGateway;
+import de.eva.forecastr.websocket.WebSocketClient;
 import java.util.List;
 
 public final class ForecastrClient {
@@ -12,7 +13,8 @@ public final class ForecastrClient {
     List<String> arguments = List.of(args);
     String server = option(arguments, "--server", "http://localhost:8080");
     CommunicationHandler communicationHandler = new CommunicationHandler(server);
-    ForecastrGateway gateway = new RestForecastrGateway(communicationHandler);
+    ForecastrGateway gateway =
+        new RestForecastrGateway(communicationHandler, new WebSocketClient(communicationHandler));
     try {
       new ConsoleClient(gateway).run();
     } catch (Exception exception) {
