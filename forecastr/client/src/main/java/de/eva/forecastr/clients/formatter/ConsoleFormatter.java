@@ -1,5 +1,6 @@
 package de.eva.forecastr.clients.formatter;
 
+import de.eva.forecastr.core.models.LiveUpdate;
 import de.eva.forecastr.core.models.Market;
 import java.io.PrintStream;
 import java.math.BigDecimal;
@@ -9,7 +10,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.List;
 import java.util.Locale;
 
 public final class ConsoleFormatter {
@@ -70,6 +70,23 @@ public final class ConsoleFormatter {
       case "ARCHIVED" -> "Archiviert";
       default -> value;
     };
+  }
+
+  public static String live(LiveUpdate update) {
+    if (update.type() == LiveUpdate.Type.CONNECTION_ERROR) {
+      return "Live-Aktualisierungen sind momentan nicht verfügbar.";
+    }
+    if (update.type() == LiveUpdate.Type.FEED) {
+      return switch (update.action() == null ? "" : update.action()) {
+        case "IMPORTED" -> "Ein neuer Markt ist verfügbar.";
+        case "RESOLVED_YES" -> "Ein Markt wurde mit JA aufgelöst.";
+        case "RESOLVED_NO" -> "Ein Markt wurde mit NEIN aufgelöst.";
+        case "EXPIRED" -> "Ein Markt wurde geschlossen und Einsätze wurden erstattet.";
+        case "ARCHIVED" -> "Ein abgeschlossener Markt wurde archiviert.";
+        default -> "Der Feed wurde aktualisiert.";
+      };
+    }
+    return "Der Feed wurde aktualisiert.";
   }
 
   public static void section(PrintStream output, String title) {

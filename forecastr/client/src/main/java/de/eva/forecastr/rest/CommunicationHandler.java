@@ -11,9 +11,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
+import java.net.http.WebSocket;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
 
 public final class CommunicationHandler {
   private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
@@ -131,6 +135,19 @@ public final class CommunicationHandler {
     }
   }
 
+  public CompletableFuture<WebSocket> subscribe(String topic, Consumer<String> messages) {
+    URI webSocketUri =
+        URI.create(
+            ("https".equalsIgnoreCase(baseUri.getScheme()) ? "wss" : "ws")
+                + "://"
+                + baseUri.getAuthority()
+                + "/ws");
+    return httpClient
+        .newWebSocketBuilder()
+        .connectTimeout(Duration.ofSeconds(5))
+        .buildAsync(webSocketUri, new MessageListener(topic, messages));
+  }
+
   private String germanError(RestResponse response) {
     if (response.status() == 0) {
       return "Der Server hat nicht rechtzeitig geantwortet.";
@@ -161,4 +178,42 @@ public final class CommunicationHandler {
     };
   }
 
+  private static final class MessageListener implements WebSocket.Listener {
+    private final String topic;
+    private final Consumer<String> messages;
+    private final StringBuilder pending;
+
+    private MessageListener(String topic, Consumer<String> messages) {
+      this.topic = topic;
+      this.messages = messages;
+      this.pending = new StringBuilder();
+    }
+
+    @Override
+    public void onOpen(WebSocket socket) {
+      socket.request(1);
+      socket.sendText("{\"action\":\"subscribe\",\"topic\":\"" + topic + "\"}", true);
+    }
+
+    @Override
+    public CompletionStage<?> onText(WebSocket socket, CharSequence data, boolean last) {
+      pending.append(data);
+      if (last) {
+        messages.accept(pending.toString());
+        pending.setLength(0);
+      }
+      socket.request(1);
+      return null;
+    }
+
+    @Override
+    public CompletionStage<?> onClose(WebSocket socket, int statusCode, String reason) {
+      return null;
+    }
+
+    @Override
+    public void onError(WebSocket socket, Throwable error) {
+      messages.accept("WebSocket error: " + error.getMessage());
+    }
+  }
 }
