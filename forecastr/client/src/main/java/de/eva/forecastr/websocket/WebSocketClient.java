@@ -20,6 +20,7 @@ public final class WebSocketClient {
   public AutoCloseable subscribeToLiveUpdates(long userId, Consumer<LiveUpdate> updates) {
     LiveSockets sockets = new LiveSockets();
     subscribe("/topic/feed", updates, sockets);
+    subscribe("/topic/users/" + userId, updates, sockets);
     return sockets;
   }
 
@@ -46,6 +47,15 @@ public final class WebSocketClient {
                     response.path("action").asText(),
                     null,
                     BigDecimal.ZERO,
+                    null));
+        case "NOTIFICATION" ->
+            Optional.of(
+                new LiveUpdate(
+                    LiveUpdate.Type.NOTIFICATION,
+                    response.path("eventId").asLong(),
+                    null,
+                    response.path("kind").asText(),
+                    response.path("amount").decimalValue(),
                     null));
         case "ERROR" -> Optional.of(connectionError(response.path("message").asText()));
         default -> Optional.empty();
