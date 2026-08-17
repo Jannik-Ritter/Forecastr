@@ -1,5 +1,6 @@
 package de.eva.forecastr.clients.formatter;
 
+import de.eva.forecastr.core.models.Bet;
 import de.eva.forecastr.core.models.LiveUpdate;
 import de.eva.forecastr.core.models.Market;
 import java.io.PrintStream;
@@ -10,6 +11,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 
 public final class ConsoleFormatter {
@@ -72,6 +76,24 @@ public final class ConsoleFormatter {
     };
   }
 
+  public static String betStatus(String value) {
+    return switch (value == null ? "" : value) {
+      case "OPEN" -> "Offen";
+      case "WON" -> "Gewonnen";
+      case "LOST" -> "Verloren";
+      case "REFUNDED" -> "Erstattet";
+      default -> value;
+    };
+  }
+
+  public static List<Bet> groupBets(List<Bet> bets) {
+    List<Bet> grouped = new ArrayList<>(bets);
+    grouped.sort(
+        Comparator.<Bet>comparingInt(bet -> betStatusOrder(bet.status()))
+            .thenComparing(Bet::placedAt, Comparator.nullsLast(Comparator.reverseOrder())));
+    return grouped;
+  }
+
   public static String live(LiveUpdate update) {
     if (update.type() == LiveUpdate.Type.CONNECTION_ERROR) {
       return "Live-Aktualisierungen sind momentan nicht verfügbar.";
@@ -86,7 +108,12 @@ public final class ConsoleFormatter {
         default -> "Der Feed wurde aktualisiert.";
       };
     }
-    return "Der Feed wurde aktualisiert.";
+    return switch (update.kind() == null ? "" : update.kind()) {
+      case "PAYOUT" -> "Gewonnen: " + money(update.amount()) + " wurden gutgeschrieben.";
+      case "LOST" -> "Eine deiner Wetten wurde leider verloren.";
+      case "REFUND" -> "Erstattung: " + money(update.amount()) + " wurden gutgeschrieben.";
+      default -> "Deine Wetten wurden aktualisiert.";
+    };
   }
 
   public static void section(PrintStream output, String title) {
@@ -112,4 +139,13 @@ public final class ConsoleFormatter {
     output.println("Pool: JA " + money(market.yesPool()) + " · NEIN " + money(market.noPool()));
   }
 
+  private static int betStatusOrder(String status) {
+    return switch (status == null ? "" : status) {
+      case "OPEN" -> 0;
+      case "WON" -> 1;
+      case "LOST" -> 2;
+      case "REFUNDED" -> 3;
+      default -> 4;
+    };
+  }
 }
