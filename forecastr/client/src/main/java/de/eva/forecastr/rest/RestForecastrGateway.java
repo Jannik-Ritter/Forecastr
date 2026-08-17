@@ -2,10 +2,12 @@ package de.eva.forecastr.rest;
 
 import de.eva.forecastr.core.interfaces.ForecastrGateway;
 import de.eva.forecastr.core.models.Balance;
+import de.eva.forecastr.core.models.Bet;
 import de.eva.forecastr.core.models.LiveUpdate;
 import de.eva.forecastr.core.models.Market;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.UserPage;
+import de.eva.forecastr.rest.commandHandler.BetRestHandler;
 import de.eva.forecastr.rest.commandHandler.EventRestHandler;
 import de.eva.forecastr.rest.commandHandler.UserRestHandler;
 import de.eva.forecastr.rest.commandHandler.WalletRestHandler;
@@ -19,6 +21,7 @@ public final class RestForecastrGateway implements ForecastrGateway {
   private final UserRestHandler userHandler;
   private final WalletRestHandler walletHandler;
   private final EventRestHandler eventHandler;
+  private final BetRestHandler betHandler;
   private final WebSocketClient webSocketClient;
 
   public RestForecastrGateway(
@@ -27,6 +30,7 @@ public final class RestForecastrGateway implements ForecastrGateway {
     this.userHandler = new UserRestHandler(communicationHandler);
     this.walletHandler = new WalletRestHandler(communicationHandler);
     this.eventHandler = new EventRestHandler(communicationHandler);
+    this.betHandler = new BetRestHandler(communicationHandler);
     this.webSocketClient = webSocketClient;
   }
 
@@ -86,6 +90,16 @@ public final class RestForecastrGateway implements ForecastrGateway {
   @Override
   public Market event(long eventId) {
     return eventHandler.getEvent(eventId);
+  }
+
+  @Override
+  public List<Bet> bets(long userId) {
+    return betHandler.getBets(userId);
+  }
+
+  @Override
+  public Bet placeBet(long userId, long eventId, String outcome, BigDecimal stake) {
+    return betHandler.placeBet(userId, eventId, outcome, stake);
   }
 
   @Override

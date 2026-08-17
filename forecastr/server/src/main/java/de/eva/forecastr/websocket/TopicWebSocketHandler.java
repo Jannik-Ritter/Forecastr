@@ -3,6 +3,7 @@ package de.eva.forecastr.websocket;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.eva.forecastr.core.models.events.EventChanged;
+import de.eva.forecastr.core.models.events.UserNotification;
 import java.io.IOException;
 import java.time.Clock;
 import java.util.List;
@@ -91,6 +92,20 @@ public class TopicWebSocketHandler extends TextWebSocketHandler {
             "type", "FEED",
             "eventId", event.eventId(),
             "action", event.action(),
+            "timestamp", clock.instant()));
+  }
+
+  @Async("applicationExecutor")
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void notifyUser(UserNotification event) {
+    broadcast(
+        "/topic/users/" + event.userId(),
+        Map.of(
+            "type", "NOTIFICATION",
+            "userId", event.userId(),
+            "eventId", event.eventId(),
+            "kind", event.kind(),
+            "amount", event.amount(),
             "timestamp", clock.instant()));
   }
 

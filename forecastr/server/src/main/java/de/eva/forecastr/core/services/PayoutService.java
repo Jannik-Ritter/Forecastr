@@ -84,6 +84,7 @@ public class PayoutService {
         recordPayout(event, bet, share);
       } else {
         bet.lose();
+        eventPublisher.userNotification(bet.getUserId(), event.getId(), "LOST", Money.ZERO);
       }
     }
     saveChanges(openBets, walletsByUserId.values());
@@ -107,6 +108,7 @@ public class PayoutService {
       walletsByUserId.get(bet.getUserId()).credit(bet.getStake());
       refundTotal = Money.amount(refundTotal.add(bet.getStake()));
       logService.log(LogType.PAYOUT, Map.of("betId", bet.getId(), "refund", bet.getStake()));
+      eventPublisher.userNotification(bet.getUserId(), event.getId(), "REFUND", bet.getStake());
     }
     saveChanges(openBets, walletsByUserId.values());
     return new ResolutionResult(
@@ -132,6 +134,7 @@ public class PayoutService {
           new FeeRevenue(bet.getId(), event.getId(), share.fee(), event.getResolvedAt()));
       logService.log(LogType.FEE, Map.of("betId", bet.getId(), "amount", share.fee()));
     }
+    eventPublisher.userNotification(bet.getUserId(), event.getId(), "PAYOUT", share.credited());
   }
 
   private Map<Long, Wallet> lockWallets(Collection<Bet> affectedBets) {

@@ -15,22 +15,26 @@ public final class EventCommandHandler {
   private final ClientSession session;
   private final ConsoleInput input;
   private final PrintStream output;
+  private final BetCommandHandler betHandler;
 
   public EventCommandHandler(
       ForecastrGateway gateway,
       ClientSession session,
       ConsoleInput input,
-      PrintStream output) {
+      PrintStream output,
+      BetCommandHandler betHandler) {
     this.gateway = gateway;
     this.session = session;
     this.input = input;
     this.output = output;
+    this.betHandler = betHandler;
   }
 
   public void feed() {
     List<Market> markets = gateway.feed();
     int index = 0;
     while (true) {
+      flushNotifications();
       if (markets.isEmpty()) {
         ConsoleFormatter.section(output, "Feed");
         output.println("Im Moment gibt es keine offenen Märkte.");
@@ -47,7 +51,8 @@ public final class EventCommandHandler {
       ConsoleFormatter.market(output, market, index + 1, markets.size(), Instant.now());
       String action =
           input.askChoice(
-              "\n[W] Weiter  [Z] Zurück  [R] Aktualisieren  [X] Menü > ");
+              "\n[W] Weiter  [Z] Zurück  [R] Aktualisieren  [X] Menü\n"
+                  + "[JA] JA wetten  [NEIN] NEIN wetten > ");
       switch (action.toLowerCase(Locale.ROOT)) {
         case "w" -> {
           if (index + 1 < markets.size()) {
@@ -57,6 +62,18 @@ public final class EventCommandHandler {
           }
         }
         case "z" -> index = Math.max(0, index - 1);
+        case "ja" -> {
+          if (betHandler.placeBet(market, "YES")) {
+            markets = gateway.feed();
+            index = findMarket(markets, market.id());
+          }
+        }
+        case "nein" -> {
+          if (betHandler.placeBet(market, "NO")) {
+            markets = gateway.feed();
+            index = findMarket(markets, market.id());
+          }
+        }
         case "r" -> {
           long selectedEventId = market.id();
           markets = gateway.feed();
@@ -98,6 +115,15 @@ public final class EventCommandHandler {
     try {
       Market market = results.get(Integer.parseInt(choice) - 1);
       ConsoleFormatter.market(output, market, 1, 1, Instant.now());
+      if ("OPEN".equals(market.status())) {
+        String action = input.askChoice("\n[JA/NEIN] Wetten   [X] Hauptmenü > ");
+        if (action.equalsIgnoreCase("ja")) {
+          betHandler.placeBet(market, "YES");
+        }
+        if (action.equalsIgnoreCase("nein")) {
+          betHandler.placeBet(market, "NO");
+        }
+      }
     } catch (IndexOutOfBoundsException | NumberFormatException exception) {
       output.println("Ungültige Auswahl.");
     }
@@ -110,6 +136,13 @@ public final class EventCommandHandler {
       }
     }
     return 0;
+  }
+
+  private void flushNotifications() {
+    String message;
+    while ((message = session.nextNotification()) != null) {
+      output.println("\nHinweis: " + message);
+    }
   }
 
   private void waitForMainMenu() {

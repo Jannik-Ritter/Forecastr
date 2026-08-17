@@ -1,5 +1,6 @@
 package de.eva.forecastr.clients;
 
+import de.eva.forecastr.clients.commandHandler.BetCommandHandler;
 import de.eva.forecastr.clients.commandHandler.EventCommandHandler;
 import de.eva.forecastr.clients.commandHandler.UserCommandHandler;
 import de.eva.forecastr.clients.commandHandler.WalletCommandHandler;
@@ -17,6 +18,7 @@ public final class ConsoleClient {
   private final PrintStream output;
   private final UserCommandHandler userHandler;
   private final EventCommandHandler eventHandler;
+  private final BetCommandHandler betHandler;
   private final WalletCommandHandler walletHandler;
 
   public ConsoleClient(ForecastrGateway gateway) {
@@ -28,8 +30,9 @@ public final class ConsoleClient {
     this.session = new ClientSession();
     this.input = new ConsoleInput(input, output);
     this.output = output;
+    this.betHandler = new BetCommandHandler(gateway, session, this.input, output);
     this.userHandler = new UserCommandHandler(gateway, session, this.input, output);
-    this.eventHandler = new EventCommandHandler(gateway, session, this.input, output);
+    this.eventHandler = new EventCommandHandler(gateway, session, this.input, output, betHandler);
     this.walletHandler = new WalletCommandHandler(gateway, session, this.input, output);
   }
 
@@ -76,8 +79,9 @@ public final class ConsoleClient {
         switch (input.askChoice("\nAuswahl > ")) {
           case "1" -> eventHandler.feed();
           case "2" -> eventHandler.search();
-          case "3" -> walletHandler.wallet();
-          case "4" -> isRunning = userHandler.profile();
+          case "3" -> betHandler.showBets();
+          case "4" -> walletHandler.wallet();
+          case "5" -> isRunning = userHandler.profile();
           case "9" -> {
             session.logout();
             isRunning = false;
@@ -98,8 +102,9 @@ public final class ConsoleClient {
     output.println();
     output.println("  [1] Feed");
     output.println("  [2] Suchen");
-    output.println("  [3] Wallet");
-    output.println("  [4] Profil");
+    output.println("  [3] Meine Wetten");
+    output.println("  [4] Wallet");
+    output.println("  [5] Profil");
     output.println("  [9] Ausloggen");
     output.println("  [0] Beenden");
   }
