@@ -25,6 +25,7 @@ public final class CommunicationHandler {
   private final URI baseUri;
   private final HttpClient httpClient;
   private final ObjectMapper objectMapper;
+  private volatile Long actorUserId;
 
   public CommunicationHandler(String baseUrl) {
     this.baseUri =
@@ -34,6 +35,10 @@ public final class CommunicationHandler {
         new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+  }
+
+  public void selectUser(Long userId) {
+    this.actorUserId = userId;
   }
 
   public RestResponse get(String path) {
@@ -62,6 +67,9 @@ public final class CommunicationHandler {
           HttpRequest.newBuilder(baseUri.resolve(path))
               .timeout(timeout)
               .header("Accept", "application/json");
+      if (actorUserId != null) {
+        request.header("X-Forecastr-User-Id", Long.toString(actorUserId));
+      }
       if (payload != null) {
         request.header("Content-Type", "application/json");
       }

@@ -35,7 +35,9 @@ public final class RestForecastrGateway implements ForecastrGateway {
   }
 
   @Override
-  public void selectUser(long userId) {}
+  public void selectUser(long userId) {
+    communicationHandler.selectUser(userId);
+  }
 
   @Override
   public List<User> users() {
