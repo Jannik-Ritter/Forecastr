@@ -2,6 +2,7 @@ package de.eva.forecastr.core.interfaces;
 
 import de.eva.forecastr.core.models.Balance;
 import de.eva.forecastr.core.models.Bet;
+import de.eva.forecastr.core.models.ImportReport;
 import de.eva.forecastr.core.models.LiveUpdate;
 import de.eva.forecastr.core.models.Market;
 import de.eva.forecastr.core.models.User;
@@ -38,6 +39,8 @@ public interface ForecastrGateway {
   List<Bet> bets(long userId);
 
   Bet placeBet(long userId, long eventId, String outcome, BigDecimal stake);
+
+  ImportReport importEvents(String path);
 
   AutoCloseable liveUpdates(long userId, Consumer<LiveUpdate> updates);
 }

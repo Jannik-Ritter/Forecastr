@@ -3,10 +3,12 @@ package de.eva.forecastr.rest;
 import de.eva.forecastr.core.interfaces.ForecastrGateway;
 import de.eva.forecastr.core.models.Balance;
 import de.eva.forecastr.core.models.Bet;
+import de.eva.forecastr.core.models.ImportReport;
 import de.eva.forecastr.core.models.LiveUpdate;
 import de.eva.forecastr.core.models.Market;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.UserPage;
+import de.eva.forecastr.rest.commandHandler.AdminRestHandler;
 import de.eva.forecastr.rest.commandHandler.BetRestHandler;
 import de.eva.forecastr.rest.commandHandler.EventRestHandler;
 import de.eva.forecastr.rest.commandHandler.UserRestHandler;
@@ -22,6 +24,7 @@ public final class RestForecastrGateway implements ForecastrGateway {
   private final WalletRestHandler walletHandler;
   private final EventRestHandler eventHandler;
   private final BetRestHandler betHandler;
+  private final AdminRestHandler adminHandler;
   private final WebSocketClient webSocketClient;
 
   public RestForecastrGateway(
@@ -31,6 +34,7 @@ public final class RestForecastrGateway implements ForecastrGateway {
     this.walletHandler = new WalletRestHandler(communicationHandler);
     this.eventHandler = new EventRestHandler(communicationHandler);
     this.betHandler = new BetRestHandler(communicationHandler);
+    this.adminHandler = new AdminRestHandler(communicationHandler);
     this.webSocketClient = webSocketClient;
   }
 
@@ -102,6 +106,11 @@ public final class RestForecastrGateway implements ForecastrGateway {
   @Override
   public Bet placeBet(long userId, long eventId, String outcome, BigDecimal stake) {
     return betHandler.placeBet(userId, eventId, outcome, stake);
+  }
+
+  @Override
+  public ImportReport importEvents(String path) {
+    return adminHandler.importEvents(path);
   }
 
   @Override

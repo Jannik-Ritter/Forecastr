@@ -1,5 +1,6 @@
 package de.eva.forecastr.clients;
 
+import de.eva.forecastr.clients.commandHandler.AdminCommandHandler;
 import de.eva.forecastr.clients.commandHandler.BetCommandHandler;
 import de.eva.forecastr.clients.commandHandler.EventCommandHandler;
 import de.eva.forecastr.clients.commandHandler.UserCommandHandler;
@@ -20,6 +21,7 @@ public final class ConsoleClient {
   private final EventCommandHandler eventHandler;
   private final BetCommandHandler betHandler;
   private final WalletCommandHandler walletHandler;
+  private final AdminCommandHandler adminHandler;
 
   public ConsoleClient(ForecastrGateway gateway) {
     this(gateway, System.in, System.out);
@@ -34,6 +36,7 @@ public final class ConsoleClient {
     this.userHandler = new UserCommandHandler(gateway, session, this.input, output);
     this.eventHandler = new EventCommandHandler(gateway, session, this.input, output, betHandler);
     this.walletHandler = new WalletCommandHandler(gateway, session, this.input, output);
+    this.adminHandler = new AdminCommandHandler(gateway, this.input, output);
   }
 
   public void run() {
@@ -82,6 +85,7 @@ public final class ConsoleClient {
           case "3" -> betHandler.showBets();
           case "4" -> walletHandler.wallet();
           case "5" -> isRunning = userHandler.profile();
+          case "6" -> openAdminPanel();
           case "9" -> {
             session.logout();
             isRunning = false;
@@ -105,8 +109,19 @@ public final class ConsoleClient {
     output.println("  [3] Meine Wetten");
     output.println("  [4] Wallet");
     output.println("  [5] Profil");
+    if (session.user().isAdmin()) {
+      output.println("  [6] Admin-Panel");
+    }
     output.println("  [9] Ausloggen");
     output.println("  [0] Beenden");
+  }
+
+  private void openAdminPanel() {
+    if (session.user().isAdmin()) {
+      adminHandler.adminPanel();
+    } else {
+      output.println("Unbekannte Auswahl.");
+    }
   }
 
   private void flushNotifications() {
