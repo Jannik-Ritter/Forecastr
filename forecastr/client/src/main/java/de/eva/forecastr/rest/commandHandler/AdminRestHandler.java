@@ -1,5 +1,6 @@
 package de.eva.forecastr.rest.commandHandler;
 
+import de.eva.forecastr.core.models.AdminStats;
 import de.eva.forecastr.core.models.ImportReport;
 import de.eva.forecastr.rest.CommunicationHandler;
 import java.net.URLEncoder;
@@ -11,6 +12,10 @@ public final class AdminRestHandler {
 
   public AdminRestHandler(CommunicationHandler communicationHandler) {
     this.communicationHandler = communicationHandler;
+  }
+
+  public AdminStats getStats() {
+    return communicationHandler.value(communicationHandler.get("/stats"), AdminStats.class);
   }
 
   public ImportReport importEvents(String path) {
