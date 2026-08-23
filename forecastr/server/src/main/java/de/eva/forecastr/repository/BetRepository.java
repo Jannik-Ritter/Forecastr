@@ -24,4 +24,11 @@ public interface BetRepository extends JpaRepository<Bet, Long> {
           + " b.outcome")
   List<EventPoolTotal> sumPools(@Param("eventIds") Collection<Long> eventIds);
 
+  @Query(
+      "select new de.eva.forecastr.repository.UserBetCount(b.userId, count(b))"
+          + " from Bet b group by b.userId order by b.userId")
+  List<UserBetCount> countByUser();
+
+  @Query("select coalesce(sum(b.payoutAmount),0) from Bet b")
+  BigDecimal sumPayouts();
 }

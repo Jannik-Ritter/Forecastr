@@ -42,4 +42,8 @@ public interface EventRepository
           + " e.plannedResolutionAt <= :now) or e.closesAt <= :now)")
   List<Long> findDueIds(@Param("now") Instant now);
 
+  @Query(
+      "select new de.eva.forecastr.repository.EventStatusCount(e.status, count(e))"
+          + " from MarketEvent e group by e.status")
+  List<EventStatusCount> countByStatus();
 }
