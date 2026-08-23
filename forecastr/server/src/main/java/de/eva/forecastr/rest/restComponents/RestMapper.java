@@ -2,6 +2,7 @@ package de.eva.forecastr.rest.restComponents;
 
 import de.eva.forecastr.core.models.Bet;
 import de.eva.forecastr.core.models.EventSnapshot;
+import de.eva.forecastr.core.models.LogEntry;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.Wallet;
 
@@ -43,4 +44,12 @@ public final class RestMapper {
         event.noPool());
   }
 
+  public static LogEntryResponse logEntry(LogEntry logEntry) {
+    return new LogEntryResponse(
+        logEntry.getId(),
+        logEntry.getTimestamp(),
+        logEntry.getType(),
+        logEntry.getPayload(),
+        logEntry.getThreadName());
+  }
 }

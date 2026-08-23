@@ -6,8 +6,11 @@ import de.eva.forecastr.core.models.LogEntry;
 import de.eva.forecastr.core.models.LogType;
 import de.eva.forecastr.repository.LogEntryRepository;
 import java.time.Clock;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,4 +39,10 @@ public class LogService {
     return logEntryRepository.save(new LogEntry(clock.instant(), type, json, threadName));
   }
 
+  public List<LogEntry> getLogs(LogType type, int limit) {
+    Pageable page = PageRequest.of(0, Math.max(1, Math.min(limit, 10_000)));
+    return type == null
+        ? logEntryRepository.findAllByOrderByTimestampDesc(page)
+        : logEntryRepository.findByTypeOrderByTimestampDesc(type, page);
+  }
 }
