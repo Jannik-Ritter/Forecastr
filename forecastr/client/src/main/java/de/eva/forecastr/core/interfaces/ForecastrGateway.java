@@ -1,5 +1,6 @@
 package de.eva.forecastr.core.interfaces;
 
+import de.eva.forecastr.core.models.AdminStats;
 import de.eva.forecastr.core.models.Balance;
 import de.eva.forecastr.core.models.Bet;
 import de.eva.forecastr.core.models.ImportReport;
@@ -39,6 +40,8 @@ public interface ForecastrGateway {
   List<Bet> bets(long userId);
 
   Bet placeBet(long userId, long eventId, String outcome, BigDecimal stake);
+
+  AdminStats adminStats();
 
   ImportReport importEvents(String path);
 

@@ -1,6 +1,7 @@
 package de.eva.forecastr.rest;
 
 import de.eva.forecastr.core.interfaces.ForecastrGateway;
+import de.eva.forecastr.core.models.AdminStats;
 import de.eva.forecastr.core.models.Balance;
 import de.eva.forecastr.core.models.Bet;
 import de.eva.forecastr.core.models.ImportReport;
@@ -106,6 +107,11 @@ public final class RestForecastrGateway implements ForecastrGateway {
   @Override
   public Bet placeBet(long userId, long eventId, String outcome, BigDecimal stake) {
     return betHandler.placeBet(userId, eventId, outcome, stake);
+  }
+
+  @Override
+  public AdminStats adminStats() {
+    return adminHandler.getStats();
   }
 
   @Override
