@@ -5,6 +5,7 @@ import de.eva.forecastr.core.models.Balance;
 import de.eva.forecastr.core.models.Bet;
 import de.eva.forecastr.core.models.ImportReport;
 import de.eva.forecastr.core.models.LiveUpdate;
+import de.eva.forecastr.core.models.ManualResolutionResult;
 import de.eva.forecastr.core.models.Market;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.UserPage;
@@ -44,6 +45,8 @@ public interface ForecastrGateway {
   AdminStats adminStats();
 
   ImportReport importEvents(String path);
+
+  ManualResolutionResult resolve(long eventId, String outcome);
 
   AutoCloseable liveUpdates(long userId, Consumer<LiveUpdate> updates);
 }

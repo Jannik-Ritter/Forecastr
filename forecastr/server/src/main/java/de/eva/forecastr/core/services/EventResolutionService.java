@@ -4,6 +4,7 @@ import de.eva.forecastr.core.interfaces.EventResolver;
 import de.eva.forecastr.core.interfaces.ForecastrEventPublisher;
 import de.eva.forecastr.core.models.EventStatus;
 import de.eva.forecastr.core.models.LogType;
+import de.eva.forecastr.core.models.ManualResolution;
 import de.eva.forecastr.core.models.MarketEvent;
 import de.eva.forecastr.core.models.Outcome;
 import de.eva.forecastr.core.models.PlannedResolution;
@@ -12,6 +13,7 @@ import de.eva.forecastr.core.models.exceptions.ForecastrException;
 import de.eva.forecastr.repository.EventRepository;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,7 +46,13 @@ public class EventResolutionService implements EventResolver {
 
   @Override
   public ResolutionResult resolve(Long eventId) {
-    return Objects.requireNonNull(transactionTemplate.execute(status -> resolveLocked(eventId)));
+    return inTransaction(eventId, ResolutionRequest.automatic());
+  }
+
+  @Override
+  public ResolutionResult resolveManually(
+      Long eventId, ManualResolution resolution, Long actorUserId) {
+    return inTransaction(eventId, ResolutionRequest.manual(resolution, actorUserId));
   }
 
   @Scheduled(fixedDelayString = "${forecastr.resolver-delay-ms:10000}")
@@ -59,7 +67,12 @@ public class EventResolutionService implements EventResolver {
     }
   }
 
-  private ResolutionResult resolveLocked(Long eventId) {
+  private ResolutionResult inTransaction(Long eventId, ResolutionRequest request) {
+    return Objects.requireNonNull(
+        transactionTemplate.execute(status -> resolveInTransaction(eventId, request)));
+  }
+
+  private ResolutionResult resolveInTransaction(Long eventId, ResolutionRequest request) {
     MarketEvent event =
         eventRepository
             .findLocked(eventId)
@@ -68,35 +81,78 @@ public class EventResolutionService implements EventResolver {
       return ResolutionResult.unchanged(eventId, event.getStatus());
     }
     Instant now = clock.instant();
-    if (event.getPlannedResolution() == PlannedResolution.UNRESOLVABLE) {
-      if (now.isBefore(event.getClosesAt())) {
-        return ResolutionResult.unchanged(eventId, event.getStatus());
-      }
-      event.expire(now);
-      return finish(event, payoutService.refund(event), "EXPIRED");
-    }
-    if (now.isBefore(event.getPlannedResolutionAt())) {
+    ResolutionDecision decision = decide(event, request, now);
+    if (decision == null) {
       return ResolutionResult.unchanged(eventId, event.getStatus());
     }
-    Outcome outcome = Outcome.valueOf(event.getPlannedResolution().name());
-    event.resolve(outcome, now);
-    return finish(event, payoutService.settle(event, outcome), "RESOLVED_" + outcome);
+    ResolutionResult payoutResult;
+    if (decision.isRefund()) {
+      event.expire(now);
+      payoutResult = payoutService.refund(event);
+    } else {
+      event.resolve(decision.outcome(), now);
+      payoutResult = payoutService.settle(event, decision.outcome());
+    }
+    eventRepository.save(event);
+    logResolution(eventId, request, decision);
+    eventPublisher.resolutionRecorded(event.getStatus());
+    eventPublisher.eventChanged(eventId, decision.feedAction());
+    return new ResolutionResult(
+        eventId,
+        event.getStatus(),
+        payoutResult.winners(),
+        payoutResult.losers(),
+        payoutResult.payouts(),
+        payoutResult.fees(),
+        true);
   }
 
-  private ResolutionResult finish(
-      MarketEvent event, ResolutionResult result, String feedAction) {
-    eventRepository.save(event);
-    logService.log(
-        LogType.RESOLUTION, Map.of("eventId", event.getId(), "result", feedAction));
-    eventPublisher.resolutionRecorded(event.getStatus());
-    eventPublisher.eventChanged(event.getId(), feedAction);
-    return new ResolutionResult(
-        event.getId(),
-        event.getStatus(),
-        result.winners(),
-        result.losers(),
-        result.payouts(),
-        result.fees(),
-        true);
+  private ResolutionDecision decide(MarketEvent event, ResolutionRequest request, Instant now) {
+    if (request.manualResolution() != null) {
+      if (request.manualResolution() == ManualResolution.REFUND) {
+        return ResolutionDecision.refund("REFUND");
+      }
+      Outcome outcome = Outcome.valueOf(request.manualResolution().name());
+      return ResolutionDecision.settle(outcome);
+    }
+    if (event.getPlannedResolution() == PlannedResolution.UNRESOLVABLE) {
+      return now.isBefore(event.getClosesAt()) ? null : ResolutionDecision.refund("EXPIRED");
+    }
+    if (now.isBefore(event.getPlannedResolutionAt())) {
+      return null;
+    }
+    return ResolutionDecision.settle(Outcome.valueOf(event.getPlannedResolution().name()));
+  }
+
+  private void logResolution(Long eventId, ResolutionRequest request, ResolutionDecision decision) {
+    Map<String, Object> payload = new LinkedHashMap<>();
+    payload.put("eventId", eventId);
+    payload.put("result", decision.logResult());
+    if (request.actorUserId() != null) {
+      payload.put("source", "ADMIN");
+      payload.put("actorUserId", request.actorUserId());
+    }
+    logService.log(LogType.RESOLUTION, payload);
+  }
+
+  private record ResolutionRequest(ManualResolution manualResolution, Long actorUserId) {
+    private static ResolutionRequest automatic() {
+      return new ResolutionRequest(null, null);
+    }
+
+    private static ResolutionRequest manual(ManualResolution resolution, Long actorUserId) {
+      return new ResolutionRequest(resolution, actorUserId);
+    }
+  }
+
+  private record ResolutionDecision(
+      boolean isRefund, Outcome outcome, Object logResult, String feedAction) {
+    private static ResolutionDecision refund(String logResult) {
+      return new ResolutionDecision(true, null, logResult, "EXPIRED");
+    }
+
+    private static ResolutionDecision settle(Outcome outcome) {
+      return new ResolutionDecision(false, outcome, outcome, "RESOLVED_" + outcome);
+    }
   }
 }

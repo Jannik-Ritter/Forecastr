@@ -5,7 +5,12 @@ import de.eva.forecastr.clients.formatter.ConsoleFormatter;
 import de.eva.forecastr.core.interfaces.ForecastrGateway;
 import de.eva.forecastr.core.models.AdminStats;
 import de.eva.forecastr.core.models.ImportReport;
+import de.eva.forecastr.core.models.ManualResolutionResult;
+import de.eva.forecastr.core.models.Market;
 import java.io.PrintStream;
+import java.time.Instant;
+import java.util.List;
+import java.util.Locale;
 
 public final class AdminCommandHandler {
   private final ForecastrGateway gateway;
@@ -23,11 +28,13 @@ public final class AdminCommandHandler {
     while (true) {
       ConsoleFormatter.section(output, "Admin-Panel");
       output.println("  [1] Dashboard");
-      output.println("  [2] CSV importieren");
+      output.println("  [2] Ereignis manuell auflösen");
+      output.println("  [3] CSV importieren");
       output.println("  [0] Hauptmenü");
       switch (input.askChoice("\nAuswahl > ")) {
         case "1" -> dashboard();
-        case "2" -> importEvents();
+        case "2" -> resolveEvent();
+        case "3" -> importEvents();
         case "0" -> {
           return;
         }
@@ -54,6 +61,52 @@ public final class AdminCommandHandler {
     waitForAdminMenu();
   }
 
+  private void resolveEvent() {
+    List<Market> markets = gateway.search("", "OPEN");
+    ConsoleFormatter.section(output, "Offene Ereignisse auflösen");
+    if (markets.isEmpty()) {
+      output.println("Es gibt keine offenen Ereignisse.");
+      waitForAdminMenu();
+      return;
+    }
+    for (int index = 0; index < markets.size(); index++) {
+      Market market = markets.get(index);
+      output.printf(
+          "[%d] %s (JA %s · NEIN %s)%n",
+          index + 1,
+          market.question(),
+          ConsoleFormatter.money(market.yesPool()),
+          ConsoleFormatter.money(market.noPool()));
+    }
+    Market market = selectMarket(markets);
+    if (market == null) {
+      return;
+    }
+    ConsoleFormatter.market(output, market, 1, 1, Instant.now());
+    String outcome =
+        resolutionOutcome(
+            input.askChoice("\n[J] JA   [N] NEIN   [R] Rückerstatten   [X] Abbrechen > "));
+    if (outcome == null) {
+      return;
+    }
+    if (outcome.isEmpty()) {
+      output.println("Unbekannte Auswahl.");
+      return;
+    }
+    ManualResolutionResult result = gateway.resolve(market.id(), outcome);
+    if (!result.changed()) {
+      output.println("Das Ereignis war bereits abgeschlossen: " + result.status());
+      return;
+    }
+    output.println(
+        "Aufgelöst als "
+            + result.status()
+            + " · Auszahlungen "
+            + ConsoleFormatter.money(result.payouts())
+            + " · Gebühren "
+            + ConsoleFormatter.money(result.fees()));
+  }
+
   private void importEvents() {
     ConsoleFormatter.section(output, "CSV importieren");
     output.println("Ein leerer Pfad importiert die gebündelten Standarddateien.");
@@ -64,6 +117,29 @@ public final class AdminCommandHandler {
         "Import abgeschlossen: %d übernommen, %d übersprungen, %d abgelehnt.%n",
         report.accepted(), report.skipped(), report.rejected());
     report.errors().forEach(error -> output.println("  - " + error));
+  }
+
+  private Market selectMarket(List<Market> markets) {
+    String choice = input.askChoice("\nNummer auswählen   [X] Admin-Panel > ");
+    if (choice.equalsIgnoreCase("x")) {
+      return null;
+    }
+    try {
+      return markets.get(Integer.parseInt(choice) - 1);
+    } catch (NumberFormatException | IndexOutOfBoundsException exception) {
+      output.println("Ungültige Auswahl.");
+      return null;
+    }
+  }
+
+  private String resolutionOutcome(String action) {
+    return switch (action.toLowerCase(Locale.ROOT)) {
+      case "j" -> "YES";
+      case "n" -> "NO";
+      case "r" -> "REFUND";
+      case "x" -> null;
+      default -> "";
+    };
   }
 
   private void waitForAdminMenu() {

@@ -2,6 +2,7 @@ package de.eva.forecastr.rest.commandHandler;
 
 import de.eva.forecastr.core.models.AdminStats;
 import de.eva.forecastr.core.models.ImportReport;
+import de.eva.forecastr.core.models.ManualResolutionResult;
 import de.eva.forecastr.rest.CommunicationHandler;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -27,4 +28,10 @@ public final class AdminRestHandler {
         communicationHandler.post("/admin/import" + query, Map.of()), ImportReport.class);
   }
 
+  public ManualResolutionResult resolve(long eventId, String outcome) {
+    return communicationHandler.value(
+        communicationHandler.post(
+            "/admin/events/" + eventId + "/resolve", Map.of("outcome", outcome)),
+        ManualResolutionResult.class);
+  }
 }
