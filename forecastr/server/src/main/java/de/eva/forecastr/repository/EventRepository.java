@@ -43,6 +43,14 @@ public interface EventRepository
   List<Long> findDueIds(@Param("now") Instant now);
 
   @Query(
+      "select e.id from MarketEvent e where e.status in"
+          + " (de.eva.forecastr.core.models.EventStatus.RESOLVED_YES,"
+          + " de.eva.forecastr.core.models.EventStatus.RESOLVED_NO,"
+          + " de.eva.forecastr.core.models.EventStatus.EXPIRED)"
+          + " and e.resolvedAt <= :cutoff")
+  List<Long> findArchivableIds(@Param("cutoff") Instant cutoff);
+
+  @Query(
       "select new de.eva.forecastr.repository.EventStatusCount(e.status, count(e))"
           + " from MarketEvent e group by e.status")
   List<EventStatusCount> countByStatus();

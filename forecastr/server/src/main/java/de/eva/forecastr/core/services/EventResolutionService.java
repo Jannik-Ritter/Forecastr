@@ -12,10 +12,12 @@ import de.eva.forecastr.core.models.ResolutionResult;
 import de.eva.forecastr.core.models.exceptions.ForecastrException;
 import de.eva.forecastr.repository.EventRepository;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -28,6 +30,7 @@ public class EventResolutionService implements EventResolver {
   private final ForecastrEventPublisher eventPublisher;
   private final Clock clock;
   private final TransactionTemplate transactionTemplate;
+  private final Duration retention;
 
   public EventResolutionService(
       EventRepository eventRepository,
@@ -35,13 +38,15 @@ public class EventResolutionService implements EventResolver {
       LogService logService,
       ForecastrEventPublisher eventPublisher,
       Clock clock,
-      TransactionTemplate transactionTemplate) {
+      TransactionTemplate transactionTemplate,
+      @Value("${forecastr.archive-retention:PT60M}") Duration retention) {
     this.eventRepository = eventRepository;
     this.payoutService = payoutService;
     this.logService = logService;
     this.eventPublisher = eventPublisher;
     this.clock = clock;
     this.transactionTemplate = transactionTemplate;
+    this.retention = retention;
   }
 
   @Override
@@ -64,6 +69,14 @@ public class EventResolutionService implements EventResolver {
         logService.log(
             LogType.RESOLUTION, Map.of("eventId", eventId, "error", exception.getMessage()));
       }
+    }
+  }
+
+  @Scheduled(fixedDelayString = "${forecastr.archive-delay-ms:60000}")
+  public void archiveOldEvents() {
+    Instant cutoff = clock.instant().minus(retention);
+    for (Long eventId : eventRepository.findArchivableIds(cutoff)) {
+      transactionTemplate.executeWithoutResult(status -> archive(eventId));
     }
   }
 
@@ -133,6 +146,16 @@ public class EventResolutionService implements EventResolver {
       payload.put("actorUserId", request.actorUserId());
     }
     logService.log(LogType.RESOLUTION, payload);
+  }
+
+  private void archive(Long eventId) {
+    MarketEvent event = eventRepository.findLocked(eventId).orElse(null);
+    if (event == null || event.getStatus() == EventStatus.ARCHIVED) {
+      return;
+    }
+    event.archive();
+    eventRepository.save(event);
+    eventPublisher.eventChanged(eventId, "ARCHIVED");
   }
 
   private record ResolutionRequest(ManualResolution manualResolution, Long actorUserId) {
