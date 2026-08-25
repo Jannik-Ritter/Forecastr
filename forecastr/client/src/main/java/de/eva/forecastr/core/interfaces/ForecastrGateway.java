@@ -7,6 +7,8 @@ import de.eva.forecastr.core.models.ImportReport;
 import de.eva.forecastr.core.models.LiveUpdate;
 import de.eva.forecastr.core.models.ManualResolutionResult;
 import de.eva.forecastr.core.models.Market;
+import de.eva.forecastr.core.models.TestEventsResponse;
+import de.eva.forecastr.core.models.TestUsersResponse;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.UserPage;
 import java.math.BigDecimal;
@@ -45,6 +47,11 @@ public interface ForecastrGateway {
   AdminStats adminStats();
 
   ImportReport importEvents(String path);
+
+  TestUsersResponse seedTestUsers(
+      int count, int betsPerUser, Long eventId, String outcome, BigDecimal stake);
+
+  TestEventsResponse seedTestEvents(int count, Integer expiresInMinutes);
 
   ManualResolutionResult resolve(long eventId, String outcome);
 

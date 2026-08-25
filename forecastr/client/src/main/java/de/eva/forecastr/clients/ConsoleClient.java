@@ -7,6 +7,7 @@ import de.eva.forecastr.clients.commandHandler.UserCommandHandler;
 import de.eva.forecastr.clients.commandHandler.WalletCommandHandler;
 import de.eva.forecastr.clients.formatter.ConsoleFormatter;
 import de.eva.forecastr.core.interfaces.ForecastrGateway;
+import de.eva.forecastr.core.interfaces.LoadTestRunner;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.exceptions.ClientException;
 import java.io.InputStream;
@@ -24,10 +25,22 @@ public final class ConsoleClient {
   private final AdminCommandHandler adminHandler;
 
   public ConsoleClient(ForecastrGateway gateway) {
-    this(gateway, System.in, System.out);
+    this(gateway, System.in, System.out, LoadTestRunner.unavailable());
+  }
+
+  public ConsoleClient(ForecastrGateway gateway, LoadTestRunner loadTestRunner) {
+    this(gateway, System.in, System.out, loadTestRunner);
   }
 
   public ConsoleClient(ForecastrGateway gateway, InputStream input, PrintStream output) {
+    this(gateway, input, output, LoadTestRunner.unavailable());
+  }
+
+  public ConsoleClient(
+      ForecastrGateway gateway,
+      InputStream input,
+      PrintStream output,
+      LoadTestRunner loadTestRunner) {
     this.gateway = gateway;
     this.session = new ClientSession();
     this.input = new ConsoleInput(input, output);
@@ -36,7 +49,7 @@ public final class ConsoleClient {
     this.userHandler = new UserCommandHandler(gateway, session, this.input, output);
     this.eventHandler = new EventCommandHandler(gateway, session, this.input, output, betHandler);
     this.walletHandler = new WalletCommandHandler(gateway, session, this.input, output);
-    this.adminHandler = new AdminCommandHandler(gateway, this.input, output);
+    this.adminHandler = new AdminCommandHandler(gateway, loadTestRunner, this.input, output);
   }
 
   public void run() {

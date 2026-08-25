@@ -8,6 +8,8 @@ import de.eva.forecastr.core.models.ImportReport;
 import de.eva.forecastr.core.models.LiveUpdate;
 import de.eva.forecastr.core.models.ManualResolutionResult;
 import de.eva.forecastr.core.models.Market;
+import de.eva.forecastr.core.models.TestEventsResponse;
+import de.eva.forecastr.core.models.TestUsersResponse;
 import de.eva.forecastr.core.models.User;
 import de.eva.forecastr.core.models.UserPage;
 import de.eva.forecastr.rest.commandHandler.AdminRestHandler;
@@ -118,6 +120,17 @@ public final class RestForecastrGateway implements ForecastrGateway {
   @Override
   public ImportReport importEvents(String path) {
     return adminHandler.importEvents(path);
+  }
+
+  @Override
+  public TestUsersResponse seedTestUsers(
+      int count, int betsPerUser, Long eventId, String outcome, BigDecimal stake) {
+    return adminHandler.seedTestUsers(count, betsPerUser, eventId, outcome, stake);
+  }
+
+  @Override
+  public TestEventsResponse seedTestEvents(int count, Integer expiresInMinutes) {
+    return adminHandler.seedTestEvents(count, expiresInMinutes);
   }
 
   @Override

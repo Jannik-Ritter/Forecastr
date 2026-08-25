@@ -1,0 +1,13 @@
+# Start the server with the test profile before running this battery.
+seed 10000 3
+bets $event -n 10000 -c 10000 --out stress-report.csv
+overbet $user $event -n 500 -c 500 --out stress-report.csv
+resolve $event -n 100 -c 100 --out stress-report.csv
+search -n 10000 -c 10000 --out stress-report.csv
+feed -n 10000 -c 10000 --out stress-report.csv
+accounts -n 2000 -c 2000 --out stress-report.csv
+stats -n 5000 -c 5000 --out stress-report.csv
+mixed -n 10000 -c 10000 --out stress-report.csv
+rate 50 60 --out stress-report.csv
+sockets -n 1000
+threads
