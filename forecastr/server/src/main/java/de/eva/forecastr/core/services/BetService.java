@@ -47,6 +47,11 @@ public class BetService {
 
   @Transactional
   public Bet placeBet(Long eventId, Long userId, Outcome outcome, BigDecimal stake) {
+    return placeBetAt(eventId, userId, outcome, stake, clock.instant());
+  }
+
+  Bet placeBetAt(
+      Long eventId, Long userId, Outcome outcome, BigDecimal stake, Instant placedAt) {
     BigDecimal normalizedStake = Money.amount(stake);
     if (normalizedStake.signum() <= 0) {
       throw new IllegalArgumentException("Stake must be positive");
@@ -62,10 +67,9 @@ public class BetService {
     if (user.isDeleted()) {
       throw ForecastrException.notFound("User not found");
     }
-    Instant now = clock.instant();
     if (event.getStatus() != EventStatus.OPEN
-        || now.isBefore(event.getCreatedAt())
-        || !now.isBefore(event.getClosesAt())) {
+        || placedAt.isBefore(event.getCreatedAt())
+        || !placedAt.isBefore(event.getClosesAt())) {
       throw ForecastrException.conflict("Event is not open for betting");
     }
     Wallet wallet =
@@ -77,7 +81,7 @@ public class BetService {
     } catch (IllegalStateException exception) {
       throw ForecastrException.paymentRequired("Insufficient balance");
     }
-    Bet bet = betRepository.save(new Bet(userId, eventId, outcome, normalizedStake, now));
+    Bet bet = betRepository.save(new Bet(userId, eventId, outcome, normalizedStake, placedAt));
     walletRepository.save(wallet);
     logService.log(
         LogType.BET,
