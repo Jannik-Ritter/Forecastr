@@ -1,0 +1,5 @@
+id,question,createdOffsetMin,closesOffsetMin,plannedResolution,plannedResolutionOffsetMin
+9100001,"Will the sub-day validation event resolve?",0,1439,YES,1
+9100002,"Will the exactly-one-day validation event resolve?",0,1440,NO,1
+9100003,"Will the over-one-day validation event be rejected?",0,1441,NO,1
+9100004,"This question without a question mark is rejected",0,60,YES,1

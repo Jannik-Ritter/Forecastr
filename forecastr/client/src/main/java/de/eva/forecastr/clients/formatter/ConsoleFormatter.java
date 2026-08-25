@@ -120,6 +120,13 @@ public final class ConsoleFormatter {
     output.println("\n" + title);
   }
 
+  public static String progress(int completed, int total) {
+    int width = 20;
+    int filled = total == 0 ? 0 : (int) ((long) completed * width / total);
+    int percentage = total == 0 ? 0 : completed * 100 / total;
+    return "[" + "#".repeat(filled) + "-".repeat(width - filled) + "] " + percentage + "%";
+  }
+
   public static void market(
       PrintStream output, Market market, int position, int total, Instant now) {
     section(output, "Markt " + position + "/" + total + " · " + eventStatus(market.status()));

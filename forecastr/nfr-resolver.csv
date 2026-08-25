@@ -1,0 +1,4 @@
+id,question,createdOffsetMin,closesOffsetMin,plannedResolution,plannedResolutionOffsetMin
+9200001,"Will the resolver replay YES?",0,1,YES,0
+9200002,"Will the resolver replay NO?",0,1,NO,0
+9200003,"Will the resolver leave this uncertain event open?",0,1,UNRESOLVABLE,
