@@ -4,6 +4,9 @@ target/
 # Internal tests
 forecastr/**/src/test/
 
+# Generated NFR / stress measurements
+*-report.csv
+
 # Compiled artifacts outside target/
 *.class
 *.jar
