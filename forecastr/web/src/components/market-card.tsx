@@ -1,7 +1,6 @@
 import { ArrowDown, ArrowUp, Clock3 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import type { Market, Outcome } from '@/core/types'
 import { eventStatusLabel, formatDeadline, formatMoney } from '@/lib/format'
 import { poolShare } from '@/lib/money'
@@ -23,10 +22,7 @@ export function MarketCard({ image, market, onBet, position, total }: MarketCard
   return (
     <article
       data-market-card
-      className={cn(
-        'relative h-full snap-start snap-always overflow-hidden bg-[#0d0d0d] text-white',
-        !image && 'brand-pattern',
-      )}
+      className="relative h-full snap-start snap-always overflow-hidden bg-[#0d0d0d] text-white"
     >
       {image && (
         <img
@@ -36,80 +32,83 @@ export function MarketCard({ image, market, onBet, position, total }: MarketCard
           className="absolute inset-0 size-full object-cover"
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/5 to-black/90" />
-      <div
-        className={cn(
-          'absolute inset-x-0 bottom-0 px-5 pt-28 lg:right-28 lg:px-8 lg:pb-8',
-          isOpen ? 'pb-44' : 'pb-28',
-        )}
-      >
-        <div className="mb-3 flex items-center gap-2">
-          <Badge className="border-white/20 bg-black/40 text-white backdrop-blur-md">
+      <div className="relative flex h-full flex-col px-5 pt-20 pb-24 [text-shadow:0_1px_12px_rgb(0_0_0/0.45)] lg:px-8 lg:pb-8">
+        <div className="flex items-center gap-3 text-xs">
+          <Badge className="gap-1.5 border-white/10 bg-white/8 text-white/80 backdrop-blur-md">
+            {isOpen && (
+              <span className="size-1.5 rounded-full bg-outcome-yes" aria-hidden="true" />
+            )}
             {eventStatusLabel(market.status)}
           </Badge>
-          <span className="text-xs text-white/65">
+          <span className="ml-auto text-white/45 tabular-nums">
             {position}/{total}
           </span>
         </div>
-        <h1 className="max-w-xl text-balance text-2xl leading-tight font-semibold tracking-[-0.035em] sm:text-3xl lg:text-[2rem]">
-          {market.question}
-        </h1>
-        <div className="mt-3 flex items-center gap-2 text-xs text-white/75">
-          <Clock3 className="size-3.5" aria-hidden="true" />
-          <span>Wetten {formatDeadline(market.closesAt)}</span>
+        <div className="my-auto max-w-xl py-8">
+          <h1 className="text-balance text-2xl leading-tight font-semibold tracking-[-0.03em] sm:text-3xl lg:text-4xl">
+            {market.question}
+          </h1>
+          <div className="mt-3 flex items-center gap-2 text-sm text-white/60">
+            <Clock3 className="size-4" aria-hidden="true" />
+            <span>Wetten {formatDeadline(market.closesAt)}</span>
+          </div>
         </div>
-        <div className="mt-5 max-w-xl">
-          <div className="mb-2 flex justify-between text-xs font-medium">
-            <span>JA · {formatMoney(market.yesPool)}</span>
-            <span>NEIN · {formatMoney(market.noPool)}</span>
+        <div>
+          <div className="mb-1.5 flex justify-between text-xs font-medium">
+            <span className="text-outcome-yes">JA · {formatMoney(market.yesPool)}</span>
+            <span className="text-outcome-no">NEIN · {formatMoney(market.noPool)}</span>
           </div>
           <div
-            className="flex h-1.5 overflow-hidden rounded-full bg-outcome-no"
+            className="flex h-1.5 overflow-hidden rounded-full bg-white/15"
             aria-label={`Poolverteilung: ${yesShare.toFixed(0)} Prozent JA`}
           >
             <div className="bg-outcome-yes" style={{ width: `${yesShare}%` }} />
+            <div className="flex-1 bg-outcome-no" />
           </div>
+          {isOpen ? (
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <OutcomeButton outcome="YES" share={yesShare} onBet={onBet} />
+              <OutcomeButton outcome="NO" share={noShare} onBet={onBet} />
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-white/55">
+              Dieser Markt ist geschlossen. {eventStatusLabel(market.status)}.
+            </p>
+          )}
         </div>
-        {!isOpen && (
-          <div className="mt-5 rounded-xl border border-white/15 bg-black/30 p-3 text-sm backdrop-blur-md">
-            Dieser Markt ist geschlossen. {eventStatusLabel(market.status)}.
-          </div>
-        )}
       </div>
-      {isOpen && (
-        <div className="absolute inset-x-5 bottom-24 z-20 grid grid-cols-2 gap-3 lg:inset-x-auto lg:right-5 lg:bottom-8 lg:flex lg:flex-col lg:gap-3">
-          <Button
-            size="lg"
-            aria-label="Ja"
-            className="h-12 border-white/15 bg-black/65 text-base text-white shadow-xl backdrop-blur-xl hover:border-outcome-yes/70 hover:bg-black/80 lg:h-auto lg:w-20 lg:flex-col lg:rounded-2xl lg:px-2 lg:py-3"
-            onClick={() => onBet('YES')}
-          >
-            <span className="size-2 rounded-full bg-outcome-yes lg:hidden" aria-hidden="true" />
-            <span className="hidden size-8 place-items-center rounded-full bg-outcome-yes text-outcome-yes-foreground lg:grid">
-              <ArrowUp className="size-4" aria-hidden="true" />
-            </span>
-            <span className="font-semibold">Ja</span>
-            <span className="hidden text-xs leading-none font-semibold text-outcome-yes lg:block">
-              {yesShare.toFixed(0)} %
-            </span>
-          </Button>
-          <Button
-            size="lg"
-            aria-label="Nein"
-            className="h-12 border-white/15 bg-black/65 text-base text-white shadow-xl backdrop-blur-xl hover:border-outcome-no/70 hover:bg-black/80 lg:h-auto lg:w-20 lg:flex-col lg:rounded-2xl lg:px-2 lg:py-3"
-            onClick={() => onBet('NO')}
-          >
-            <span className="size-2 rounded-full bg-outcome-no lg:hidden" aria-hidden="true" />
-            <span className="hidden size-8 place-items-center rounded-full bg-outcome-no text-outcome-no-foreground lg:grid">
-              <ArrowDown className="size-4" aria-hidden="true" />
-            </span>
-            <span className="font-semibold">Nein</span>
-            <span className="hidden text-xs leading-none font-semibold text-outcome-no lg:block">
-              {noShare.toFixed(0)} %
-            </span>
-          </Button>
-        </div>
-      )}
     </article>
+  )
+}
+
+function OutcomeButton({
+  outcome,
+  share,
+  onBet,
+}: {
+  outcome: Outcome
+  share: number
+  onBet: (outcome: Outcome) => void
+}) {
+  const isYes = outcome === 'YES'
+  const Icon = isYes ? ArrowUp : ArrowDown
+  const label = isYes ? 'Ja' : 'Nein'
+
+  return (
+    <button
+      type="button"
+      aria-label={`${label}, ${share.toFixed(0)} Prozent`}
+      onClick={() => onBet(outcome)}
+      className={cn(
+        'flex h-12 items-center justify-center gap-2 rounded-xl text-sm font-semibold transition [text-shadow:none] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 active:scale-[0.98]',
+        isYes
+          ? 'bg-outcome-yes text-outcome-yes-foreground hover:bg-outcome-yes/90'
+          : 'bg-outcome-no text-outcome-no-foreground hover:bg-outcome-no/90',
+      )}
+    >
+      <Icon className="size-4" aria-hidden="true" />
+      {label}
+      <span className="text-xs font-medium opacity-70 tabular-nums">{share.toFixed(0)} %</span>
+    </button>
   )
 }

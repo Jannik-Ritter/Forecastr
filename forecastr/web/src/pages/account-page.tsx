@@ -55,7 +55,7 @@ export function AccountPage() {
   }
 
   return (
-    <main className="brand-pattern relative min-h-dvh overflow-hidden px-4 py-10 text-white">
+    <main className="relative min-h-dvh overflow-hidden bg-[#0d0d0d] px-4 py-10 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(99,102,241,0.2),transparent_38%),linear-gradient(to_bottom,rgba(13,13,13,0.2),#0d0d0d_86%)]" />
       <div className="relative mx-auto flex min-h-[calc(100dvh-5rem)] max-w-md flex-col justify-center">
         <div className="mb-7 text-center">

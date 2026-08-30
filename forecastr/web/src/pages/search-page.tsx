@@ -83,7 +83,7 @@ export function SearchPage() {
                   <div
                     className={cn(
                       'size-20 shrink-0 rounded-xl bg-cover bg-center',
-                      !image && 'brand-pattern',
+                      !image && 'bg-muted',
                     )}
                     style={image ? { backgroundImage: `url(${image})` } : undefined}
                     aria-hidden="true"

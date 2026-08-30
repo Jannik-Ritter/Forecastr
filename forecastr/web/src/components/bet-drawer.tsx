@@ -89,7 +89,7 @@ export function BetDrawer({ market, outcome, open, onOpenChange }: BetDrawerProp
         }
       }}
     >
-      <DrawerContent className="lg:left-[calc(50%+7.5rem)] lg:right-auto lg:w-[480px] lg:-translate-x-1/2">
+      <DrawerContent className="lg:left-[calc(50%_+_7.5rem)] lg:right-auto lg:w-120 lg:-translate-x-1/2">
         <form onSubmit={submit} className="mx-auto w-full max-w-md">
           <DrawerHeader>
             <DrawerTitle>

@@ -1,7 +1,7 @@
 import { House, Search, TicketCheck, UserRound, WalletCards } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 
-import { BrandLogo } from '@/components/brand-logo'
+import { BrandLogo, BrandMark } from '@/components/brand-logo'
 import { cn } from '@/lib/utils'
 
 const destinations = [
@@ -37,11 +37,14 @@ export function DesktopNavigation() {
         ))}
       </nav>
       <div className="mt-auto px-3 pb-2">
-        <p className="text-sm leading-snug font-medium">
-          Kurze Aufmerksamkeitsspanne.
-          <br />
-          Langfristige Konsequenzen.
-        </p>
+        <div className="border-t border-sidebar-border pt-4">
+          <BrandMark className="mb-3 h-3.5 w-auto text-brand" />
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Kurze Aufmerksamkeitsspanne.
+            <br />
+            Langfristige Konsequenzen.
+          </p>
+        </div>
       </div>
     </aside>
   )
