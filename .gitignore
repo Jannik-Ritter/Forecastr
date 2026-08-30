@@ -1,6 +1,12 @@
 # Maven build output
 target/
 
+# Web client build and dependency output
+forecastr/web/node_modules/
+forecastr/web/dist/
+forecastr/web/coverage/
+forecastr/web/.vite/
+
 # Internal tests
 forecastr/**/src/test/
 
@@ -39,12 +45,14 @@ replay_pid*
 .settings/
 .agents/
 .vscode/
+.codex/
 *.swp
 *~
 
 # internal
 task/
 docs/
+references/
 
 # OS
 .DS_Store

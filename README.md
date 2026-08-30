@@ -1,14 +1,17 @@
 # Forecastr
 
-Forecastr ist ein Java-21-Prototyp für kurzlebige binäre Prognosemärkte. Das Projekt besteht aus einem Spring-Boot-Server mit REST, WebSocket und H2 sowie einem eigenständigen Java-Konsolenclient.
+Forecastr ist ein Java-21-Prototyp für kurzlebige binäre Prognosemärkte. Das Projekt besteht aus einem Spring-Boot-Server mit REST, WebSocket und H2, einem Java-Konsolenclient und einem mobilen Webclient im vertikalen Feed-Stil.
 
 ## Bauen
 
-Voraussetzungen: JDK 21 und Maven 3.9+.
+Voraussetzungen: JDK 21 und Maven 3.9+. Für den Webclient werden zusätzlich Node.js 22 und npm 10 benötigt.
 
 ```bash
 cd forecastr
 mvn clean package
+cd web
+npm ci
+npm run build
 ```
 
 ## Starten
@@ -42,11 +45,22 @@ java -jar server/target/forecastr-server-1.0.0-SNAPSHOT.jar --spring.profiles.ac
 java -jar client/target/client.jar --stress --script stress.txt
 ```
 
-Alternativ gibt es auch ein Script, was neu baut und frontend + backend gleichzeitig startet.
+Alternativ startet ein Script Server und Konsolenclient gemeinsam.
 
 ```bash
 ./scripts/run.sh
 ```
+
+Der Webclient verwendet eine auf Smartphones optimierte, vertikal scrollbare Marktansicht. Server und Webclient starten gemeinsam mit:
+
+```bash
+./scripts/run-web.sh
+```
+
+Das Script läuft im Vordergrund. Das Terminal muss geöffnet bleiben, da beim
+Beenden sowohl Webclient als auch Server gestoppt werden.
+
+Eigene Tierbilder unter `forecastr/web/src/assets/pets/` werden zufällig als Feed-Hintergründe verwendet.
 
 Die vollständige automatisierte Suite kann alternativ mit `--simulate` oder aus dem
 Admin-Panel gestartet werden; dafür muss der Server mit dem Profil `test` laufen.
