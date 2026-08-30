@@ -4,7 +4,13 @@
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
-@custom-variant hover-fine (@media (hover: hover) and (pointer: fine));
+@custom-variant hover-fine {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
     --font-heading: var(--font-sans);
@@ -223,6 +229,16 @@
   transition-duration: 150ms;
   transition-property: transform;
   transition-timing-function: var(--ease-out);
+}
+
+.ui-selection-indicator {
+  transition:
+    transform 220ms var(--ease-in-out),
+    opacity 120ms var(--ease-out);
+}
+
+.ui-selection-indicator-content {
+  transition: transform 220ms var(--ease-in-out);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -482,6 +498,14 @@
   .ui-pressable,
   .ui-list-pressable {
     transition-property: background-color, border-color, color, box-shadow, opacity;
+  }
+
+  .ui-selection-indicator {
+    transition: opacity 120ms var(--ease-out);
+  }
+
+  .ui-selection-indicator-content {
+    transition: none;
   }
 
   .ui-modal-content[data-state="open"],

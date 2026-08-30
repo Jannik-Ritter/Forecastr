@@ -37,10 +37,25 @@ import { forecastrApi, queryKeys } from '@/core/forecastr-api'
 import type { ManualResolution, Market, Outcome } from '@/core/types'
 import { eventStatusLabel, formatMoney } from '@/lib/format'
 import { parseMoneyInput } from '@/lib/money'
+import { cn } from '@/lib/utils'
 import { useSession } from '@/session/session-context'
+
+const adminSections = [
+  { value: 'overview', label: 'Übersicht', icon: BarChart3 },
+  { value: 'resolve', label: 'Auflösen', icon: Gavel },
+  { value: 'import', label: 'Import', icon: FileUp },
+  { value: 'seed', label: 'Testdaten', icon: Database },
+]
 
 export function AdminPage() {
   const { user } = useSession()
+  const [activeSection, setActiveSection] = useState('overview')
+  const [isPointerSelection, setIsPointerSelection] = useState(false)
+  const activeSectionIndex = adminSections.findIndex(
+    (section) => section.value === activeSection,
+  )
+  const indicatorTransform = `translate3d(${activeSectionIndex * 100}%, 0, 0)`
+  const indicatorContentTransform = `translate3d(${-activeSectionIndex * (100 / adminSections.length)}%, 0, 0)`
 
   return (
     <div className="ui-page-enter mx-auto max-w-2xl">
@@ -53,24 +68,49 @@ export function AdminPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Admin-Panel</h1>
         </div>
       </div>
-      <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview" aria-label="Übersicht">
-            <BarChart3 aria-hidden="true" />
-            <span className="hidden sm:inline">Übersicht</span>
-          </TabsTrigger>
-          <TabsTrigger value="resolve" aria-label="Auflösen">
-            <Gavel aria-hidden="true" />
-            <span className="hidden sm:inline">Auflösen</span>
-          </TabsTrigger>
-          <TabsTrigger value="import" aria-label="Import">
-            <FileUp aria-hidden="true" />
-            <span className="hidden sm:inline">Import</span>
-          </TabsTrigger>
-          <TabsTrigger value="seed" aria-label="Testdaten">
-            <Database aria-hidden="true" />
-            <span className="hidden sm:inline">Testdaten</span>
-          </TabsTrigger>
+      <Tabs value={activeSection} onValueChange={setActiveSection}>
+        <TabsList
+          className="relative grid w-full grid-cols-4 overflow-hidden rounded-xl border border-border bg-card/85 p-1 shadow-sm group-data-horizontal/tabs:h-12"
+          onPointerDown={() => setIsPointerSelection(true)}
+          onKeyDown={() => setIsPointerSelection(false)}
+        >
+          <span
+            aria-hidden="true"
+            className={cn(
+              'admin-tabs-indicator pointer-events-none absolute inset-y-1 left-1 z-20 w-[calc((100%-0.5rem)/4)] overflow-hidden rounded-lg bg-accent text-accent-foreground shadow-sm',
+              isPointerSelection && 'ui-selection-indicator',
+            )}
+            style={{ transform: indicatorTransform }}
+          >
+            <span
+              className={cn(
+                'admin-tabs-indicator-content absolute inset-y-0 left-0 grid w-[400%] grid-cols-4',
+                isPointerSelection && 'ui-selection-indicator-content',
+              )}
+              style={{ transform: indicatorContentTransform }}
+            >
+              {adminSections.map(({ value, label, icon: Icon }) => (
+                <span
+                  key={value}
+                  className="flex h-full min-w-0 items-center justify-center gap-1.5 px-1.5 text-sm font-medium"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">{label}</span>
+                </span>
+              ))}
+            </span>
+          </span>
+          {adminSections.map(({ value, label, icon: Icon }) => (
+            <TabsTrigger
+              key={value}
+              value={value}
+              aria-label={label}
+              className="relative z-10 h-full rounded-lg text-muted-foreground data-active:border-transparent data-active:bg-transparent data-active:text-muted-foreground data-active:shadow-none focus-visible:z-30 dark:data-active:border-transparent dark:data-active:bg-transparent dark:data-active:text-muted-foreground"
+            >
+              <Icon aria-hidden="true" />
+              <span className="hidden sm:inline">{label}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
         <TabsContent value="overview" className="mt-5">
           <Overview userId={user!.id} />
