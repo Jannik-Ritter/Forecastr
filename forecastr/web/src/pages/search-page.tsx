@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Search } from 'lucide-react'
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { BetDrawer } from '@/components/bet-drawer'
 import { EmptyState, PageError, PageLoading } from '@/components/page-state'
@@ -24,8 +25,9 @@ import { useSession } from '@/session/session-context'
 
 export function SearchPage() {
   const { user } = useSession()
-  const [input, setInput] = useState('')
-  const [term, setTerm] = useState<string | null>(null)
+  const [searchParameters, setSearchParameters] = useSearchParams()
+  const term = searchParameters.has('q') ? (searchParameters.get('q') ?? '').trim() : null
+  const [input, setInput] = useState(term ?? '')
   const [selected, setSelected] = useState<Market | null>(null)
   const [bet, setBet] = useState<{ market: Market; outcome: Outcome } | null>(null)
   const imageFor = usePetImages()
@@ -34,6 +36,10 @@ export function SearchPage() {
     queryFn: () => forecastrApi.searchEvents(user!.id, term ?? ''),
     enabled: term !== null,
   })
+
+  useEffect(() => {
+    setInput(term ?? '')
+  }, [term])
 
   return (
     <div className="ui-page-enter mx-auto max-w-2xl">
@@ -45,7 +51,9 @@ export function SearchPage() {
         className="flex gap-2"
         onSubmit={(event) => {
           event.preventDefault()
-          setTerm(input.trim())
+          const nextParameters = new URLSearchParams()
+          nextParameters.set('q', input.trim())
+          setSearchParameters(nextParameters)
         }}
       >
         <Input

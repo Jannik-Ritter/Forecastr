@@ -49,9 +49,14 @@ export function AppShell() {
     }
   }, [logout, queryClient, userQuery.error])
 
+  const leave = () => {
+    queryClient.clear()
+    logout()
+  }
+
   return (
     <div className="h-dvh overflow-hidden bg-background lg:flex">
-      <DesktopNavigation />
+      <DesktopNavigation onLogout={leave} />
       <main className="relative h-dvh min-w-0 flex-1 overflow-hidden bg-background">
         <header
           className={cn(
@@ -72,7 +77,7 @@ export function AppShell() {
             <Link
               to="/wallet"
               className={cn(
-                'ui-pressable ui-touch-target rounded-full border px-3 py-1.5 text-xs font-medium tabular-nums backdrop-blur-md',
+                'ui-pressable ui-touch-target inline-flex items-center justify-center rounded-full border px-3 py-1.5 text-xs font-medium tabular-nums backdrop-blur-md',
                 isFeed ? 'border-foreground/15 bg-background/35' : 'border-border bg-card',
               )}
             >
