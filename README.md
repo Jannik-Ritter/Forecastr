@@ -1,6 +1,20 @@
-# Forecastr
+<div align="center">
+  <img src="forecastr/web/public/favicon.svg" alt="Forecastr Logo" width="88" height="88">
 
-Forecastr ist ein Java-21-Prototyp für kurzlebige binäre Prognosemärkte. Das Projekt besteht aus einem Spring-Boot-Server mit REST, WebSocket und H2, einem Java-Konsolenclient und einem mobilen Webclient im vertikalen Feed-Stil.
+  <h1>Forecastr</h1>
+
+  <p><strong>Kurze Aufmerksamkeitsspanne. Langfristige Konsequenzen.</strong></p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Java-21-0d0d0d?style=flat-square&amp;logo=openjdk&amp;logoColor=white" alt="Java 21">
+    <img src="https://img.shields.io/badge/Spring_Boot-3.3.5-6366f1?style=flat-square&amp;logo=springboot&amp;logoColor=white" alt="Spring Boot 3.3.5">
+    <img src="https://img.shields.io/badge/React-19-0d0d0d?style=flat-square&amp;logo=react&amp;logoColor=white" alt="React 19">
+  </p>
+</div>
+
+---
+
+Forecastr ist ein Java-21-Prototyp für kurzlebige binäre Prognosemärkte. Das Projekt besteht aus einem Spring-Boot-Server mit REST, WebSocket und H2, einem Java-Konsolenclient und einem mobilen Webclient im TikTok-Stil.
 
 ## Bauen
 
@@ -56,11 +70,6 @@ Der Webclient verwendet eine auf Smartphones optimierte, vertikal scrollbare Mar
 ```bash
 ./scripts/run-web.sh
 ```
-
-Das Script läuft im Vordergrund. Das Terminal muss geöffnet bleiben, da beim
-Beenden sowohl Webclient als auch Server gestoppt werden.
-
-Eigene Tierbilder unter `forecastr/web/src/assets/pets/` werden zufällig als Feed-Hintergründe verwendet.
 
 Die vollständige automatisierte Suite kann alternativ mit `--simulate` oder aus dem
 Admin-Panel gestartet werden; dafür muss der Server mit dem Profil `test` laufen.
