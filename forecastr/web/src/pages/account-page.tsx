@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, LoaderCircle, Plus, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LoaderCircle, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
+import { BrandLogo } from '@/components/brand-logo'
 import { PageError, PageLoading } from '@/components/page-state'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -54,16 +55,16 @@ export function AccountPage() {
   }
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-zinc-950 px-4 py-10 text-white">
+    <main className="brand-pattern relative min-h-dvh overflow-hidden px-4 py-10 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(99,102,241,0.2),transparent_38%),linear-gradient(to_bottom,rgba(13,13,13,0.2),#0d0d0d_86%)]" />
       <div className="relative mx-auto flex min-h-[calc(100dvh-5rem)] max-w-md flex-col justify-center">
         <div className="mb-7 text-center">
-          <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-white text-black shadow-xl">
-            <Sparkles className="size-6" aria-hidden="true" />
-          </div>
-          <h1 className="text-3xl font-semibold tracking-tight">FORECASTR</h1>
+          <h1 className="flex justify-center text-4xl">
+            <BrandLogo />
+          </h1>
           <p className="mt-2 text-sm text-white/60">Wähle ein Demo-Konto und starte den Feed.</p>
         </div>
-        <Card className="border-white/10 bg-white/95 text-zinc-950 shadow-2xl dark:bg-zinc-900 dark:text-white">
+        <Card className="border-white/10 bg-card/95 text-card-foreground shadow-2xl backdrop-blur-xl">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Konto auswählen</CardTitle>
@@ -86,7 +87,7 @@ export function AccountPage() {
                     className="flex w-full items-center justify-between rounded-xl border bg-background px-3 py-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="grid size-9 place-items-center rounded-full bg-foreground text-xs font-bold text-background">
+                      <span className="grid size-9 place-items-center rounded-full bg-brand text-xs font-bold text-white">
                         {listedUser.username.slice(0, 2).toUpperCase()}
                       </span>
                       <span className="font-medium">{listedUser.username}</span>

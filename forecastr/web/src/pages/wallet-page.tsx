@@ -70,7 +70,7 @@ export function WalletPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Guthaben</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Wallet</h1>

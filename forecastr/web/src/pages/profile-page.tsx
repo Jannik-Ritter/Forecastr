@@ -68,7 +68,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-5">
+    <div className="mx-auto max-w-2xl space-y-5">
       <div>
         <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Konto</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Profil</h1>

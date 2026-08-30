@@ -92,14 +92,14 @@ function WinCelebration({ amount }: { amount: Money }) {
         ))}
       </div>
       <div
-        className="win-celebration-card rounded-3xl border border-emerald-400/40 bg-zinc-950 px-8 py-7 text-center text-white shadow-2xl"
+        className="win-celebration-card rounded-3xl border border-outcome-yes/40 bg-[#0d0d0d] px-8 py-7 text-center text-white shadow-2xl"
         role="status"
         aria-live="polite"
       >
-        <span className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-400 text-zinc-950">
+        <span className="mx-auto grid size-14 place-items-center rounded-full bg-outcome-yes text-outcome-yes-foreground">
           <PartyPopper className="size-7" aria-hidden="true" />
         </span>
-        <p className="mt-4 text-sm font-medium tracking-widest text-emerald-300 uppercase">
+        <p className="mt-4 text-sm font-medium tracking-widest text-outcome-yes uppercase">
           Gewonnen
         </p>
         <p className="mt-1 text-3xl font-semibold tracking-tight">{formatMoney(amount)}</p>

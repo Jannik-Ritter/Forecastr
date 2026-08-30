@@ -29,14 +29,6 @@ export function usePetImages(): (marketId: string) => string | undefined {
   }, [])
 }
 
-export function fallbackColor(marketId: string): string {
-  let hash = 0
-  for (const character of marketId) {
-    hash = (hash * 31 + character.charCodeAt(0)) % 360
-  }
-  return `hsl(${hash} 34% 20%)`
-}
-
 function shuffle(values: string[]): string[] {
   const shuffled = [...values]
   for (let index = shuffled.length - 1; index > 0; index--) {

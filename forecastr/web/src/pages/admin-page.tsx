@@ -33,7 +33,7 @@ export function AdminPage() {
   const { user } = useSession()
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto max-w-2xl">
       <div className="mb-6 flex items-center gap-3">
         <div className="grid size-10 place-items-center rounded-xl bg-foreground text-background">
           <ShieldCheck className="size-5" aria-hidden="true" />
@@ -210,14 +210,14 @@ function Resolution({ userId }: { userId: string }) {
               <div className="grid grid-cols-3 gap-2">
                 <Button
                   disabled={resolve.isPending}
-                  className="bg-emerald-500 text-white hover:bg-emerald-600"
+                  className="bg-outcome-yes text-outcome-yes-foreground hover:brightness-95"
                   onClick={() => resolve.mutate('YES')}
                 >
                   JA
                 </Button>
                 <Button
                   disabled={resolve.isPending}
-                  className="bg-rose-500 text-white hover:bg-rose-600"
+                  className="bg-outcome-no text-outcome-no-foreground hover:brightness-95"
                   onClick={() => resolve.mutate('NO')}
                 >
                   NEIN

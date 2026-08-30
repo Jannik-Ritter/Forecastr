@@ -3,6 +3,7 @@ import { ShieldCheck } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 
+import { BrandLogo } from '@/components/brand-logo'
 import { DesktopNavigation, MobileNavigation } from '@/components/navigation'
 import { ApiError } from '@/core/api-client'
 import { forecastrApi, queryKeys } from '@/core/forecastr-api'
@@ -42,24 +43,64 @@ export function AppShell() {
   }, [logout, queryClient, userQuery.error])
 
   return (
-    <div className="h-dvh overflow-hidden bg-muted/35 lg:grid lg:grid-cols-[220px_480px_220px] lg:justify-center lg:gap-6 lg:p-4">
+    <div className="h-dvh overflow-hidden bg-background lg:flex">
       <DesktopNavigation />
-      <main className="relative h-dvh overflow-hidden bg-background shadow-2xl lg:h-[calc(100dvh-2rem)] lg:rounded-[2rem] lg:border">
-        <header className="pointer-events-none absolute inset-x-0 top-0 z-40 flex h-16 items-center justify-between bg-black/55 px-4 text-white backdrop-blur-md">
-          <Link to="/feed" className="pointer-events-auto font-semibold tracking-tight">
-            FORECASTR
+      <main className="relative h-dvh min-w-0 flex-1 overflow-hidden bg-background">
+        <header
+          className={cn(
+            'pointer-events-none absolute inset-x-0 top-0 z-40 flex h-16 items-center justify-between px-4 backdrop-blur-md lg:hidden',
+            isFeed
+              ? 'bg-black/45 text-white'
+              : 'border-b bg-background/90 text-foreground',
+          )}
+        >
+          <Link
+            to="/feed"
+            aria-label="Forecastr Feed"
+            className="pointer-events-auto text-xl"
+          >
+            <BrandLogo />
           </Link>
           <div className="pointer-events-auto flex items-center gap-2">
             <Link
               to="/wallet"
-              className="rounded-full border border-white/15 bg-black/35 px-3 py-1.5 text-xs font-medium backdrop-blur-md"
+              className={cn(
+                'rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-md',
+                isFeed ? 'border-white/15 bg-black/35' : 'border-border bg-card',
+              )}
             >
               {balanceQuery.data ? formatMoney(balanceQuery.data.balance) : '–'}
             </Link>
             <Link
               to="/profile"
               aria-label={`Profil von ${user!.username}`}
-              className="grid size-8 place-items-center rounded-full bg-white text-xs font-bold text-black"
+              className="grid size-8 place-items-center rounded-full bg-brand text-xs font-bold text-white"
+            >
+              {user!.username.slice(0, 2).toUpperCase()}
+            </Link>
+          </div>
+        </header>
+        <header className="pointer-events-none absolute right-5 top-4 z-50 hidden items-center justify-end lg:flex">
+          <div className="pointer-events-auto flex items-center gap-1 rounded-full border bg-card/90 p-1 shadow-xl backdrop-blur-xl">
+            {user!.isAdmin && (
+              <Link
+                to="/admin"
+                aria-label="Admin-Panel"
+                className="grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <ShieldCheck className="size-4" aria-hidden="true" />
+              </Link>
+            )}
+            <Link
+              to="/wallet"
+              className="rounded-full px-3 py-2 text-xs font-semibold tabular-nums transition-colors hover:bg-muted"
+            >
+              {balanceQuery.data ? formatMoney(balanceQuery.data.balance) : '–'}
+            </Link>
+            <Link
+              to="/profile"
+              aria-label={`Profil von ${user!.username}`}
+              className="grid size-9 place-items-center rounded-full bg-brand text-xs font-bold text-white"
             >
               {user!.username.slice(0, 2).toUpperCase()}
             </Link>
@@ -68,33 +109,15 @@ export function AppShell() {
         <div
           className={cn(
             'h-full',
-            isFeed ? 'overflow-hidden' : 'overflow-y-auto bg-background px-4 pb-24 pt-20',
+            isFeed
+              ? 'overflow-hidden bg-[#0d0d0d]'
+              : 'overflow-y-auto bg-background px-4 pb-24 pt-20 lg:px-10 lg:pb-12 lg:pt-24 xl:px-16',
           )}
         >
           <Outlet />
         </div>
         <MobileNavigation />
       </main>
-      <aside className="hidden h-[calc(100dvh-2rem)] flex-col py-8 lg:flex">
-        <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm">
-          <div>
-            <p className="text-sm font-medium">{user!.username}</p>
-            <p className="text-xs text-muted-foreground">Demo-Konto</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Verfügbar</p>
-            <p className="mt-1 text-lg font-semibold">
-              {balanceQuery.data ? formatMoney(balanceQuery.data.balance) : '–'}
-            </p>
-          </div>
-          {user!.isAdmin && (
-            <Link to="/admin" className="flex items-center gap-2 text-sm font-medium">
-              <ShieldCheck className="size-4" aria-hidden="true" />
-              Admin-Panel
-            </Link>
-          )}
-        </div>
-      </aside>
     </div>
   )
 }

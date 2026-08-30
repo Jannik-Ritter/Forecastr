@@ -89,7 +89,7 @@ export function BetDrawer({ market, outcome, open, onOpenChange }: BetDrawerProp
         }
       }}
     >
-      <DrawerContent className="lg:left-1/2 lg:right-auto lg:w-[480px] lg:-translate-x-1/2">
+      <DrawerContent className="lg:left-[calc(50%+7.5rem)] lg:right-auto lg:w-[480px] lg:-translate-x-1/2">
         <form onSubmit={submit} className="mx-auto w-full max-w-md">
           <DrawerHeader>
             <DrawerTitle>
@@ -128,8 +128,8 @@ export function BetDrawer({ market, outcome, open, onOpenChange }: BetDrawerProp
               disabled={!parsedAmount.value || isOverBalance || mutation.isPending}
               className={
                 outcome === 'YES'
-                  ? 'bg-emerald-500 text-white hover:bg-emerald-600'
-                  : 'bg-rose-500 text-white hover:bg-rose-600'
+                  ? 'bg-outcome-yes text-outcome-yes-foreground hover:brightness-95'
+                  : 'bg-outcome-no text-outcome-no-foreground hover:brightness-95'
               }
             >
               {mutation.isPending && <LoaderCircle className="animate-spin" aria-hidden="true" />}

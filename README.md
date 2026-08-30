@@ -57,6 +57,9 @@ Der Webclient verwendet eine auf Smartphones optimierte, vertikal scrollbare Mar
 ./scripts/run-web.sh
 ```
 
+Das Script läuft im Vordergrund. Das Terminal muss geöffnet bleiben, da beim
+Beenden sowohl Webclient als auch Server gestoppt werden.
+
 Eigene Tierbilder unter `forecastr/web/src/assets/pets/` werden zufällig als Feed-Hintergründe verwendet.
 
 Die vollständige automatisierte Suite kann alternativ mit `--simulate` oder aus dem

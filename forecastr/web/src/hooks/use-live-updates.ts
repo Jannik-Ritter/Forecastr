@@ -33,15 +33,20 @@ export function useLiveUpdates(userId: string) {
     }
 
     const connect = () => {
+      reconnectTimer = undefined
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
       socket = new WebSocket(`${protocol}//${window.location.host}/ws`)
       socket.addEventListener('open', () => {
+        const shouldRefreshQueries = reconnectAttempt > 0
         reconnectAttempt = 0
         hasShownConnectionWarning = false
         socket?.send(JSON.stringify({ action: 'subscribe', topic: '/topic/feed' }))
         socket?.send(
           JSON.stringify({ action: 'subscribe', topic: `/topic/users/${userId}` }),
         )
+        if (shouldRefreshQueries) {
+          void queryClient.refetchQueries({ type: 'active' })
+        }
       })
       socket.addEventListener('message', (event) => {
         if (typeof event.data !== 'string') {
@@ -74,7 +79,7 @@ export function useLiveUpdates(userId: string) {
       socket.addEventListener('error', () => socket?.close())
     }
 
-    connect()
+    reconnectTimer = window.setTimeout(connect, 0)
     return () => {
       isClosed = true
       if (reconnectTimer !== undefined) {

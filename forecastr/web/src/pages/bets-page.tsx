@@ -43,7 +43,7 @@ export function BetsPage() {
   })
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto max-w-2xl">
       <div className="mb-6 flex items-end justify-between">
         <div>
           <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Portfolio</p>
@@ -82,8 +82,8 @@ export function BetsPage() {
                           <Badge
                             className={
                               bet.outcome === 'YES'
-                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300'
-                                : 'bg-rose-500/15 text-rose-600 dark:text-rose-300'
+                                ? 'bg-outcome-yes/15 text-green-700 dark:text-outcome-yes'
+                                : 'bg-outcome-no/15 text-red-700 dark:text-outcome-no'
                             }
                           >
                             {outcomeLabel(bet.outcome)}
@@ -105,7 +105,7 @@ export function BetsPage() {
                           </p>
                         )}
                         {bet.status === 'WON' && (
-                          <p className="text-sm text-emerald-600 dark:text-emerald-300">
+                          <p className="text-sm text-green-700 dark:text-outcome-yes">
                             Ausgezahlt {formatMoney(bet.payoutAmount)} · Gebühr {formatMoney(bet.feeAmount)}
                           </p>
                         )}

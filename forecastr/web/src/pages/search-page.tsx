@@ -18,7 +18,8 @@ import { Input } from '@/components/ui/input'
 import { forecastrApi, queryKeys } from '@/core/forecastr-api'
 import type { Market, Outcome } from '@/core/types'
 import { eventStatusLabel, formatDeadline, formatMoney } from '@/lib/format'
-import { fallbackColor, usePetImages } from '@/lib/pet-images'
+import { usePetImages } from '@/lib/pet-images'
+import { cn } from '@/lib/utils'
 import { useSession } from '@/session/session-context'
 
 export function SearchPage() {
@@ -35,7 +36,7 @@ export function SearchPage() {
   })
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto max-w-2xl">
       <div className="mb-6">
         <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Märkte</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Suchen</h1>
@@ -80,12 +81,11 @@ export function SearchPage() {
               <Card className="overflow-hidden p-0 transition-transform hover:-translate-y-0.5">
                 <CardContent className="flex gap-3 p-3">
                   <div
-                    className="size-20 shrink-0 rounded-xl bg-cover bg-center"
-                    style={
-                      image
-                        ? { backgroundImage: `url(${image})` }
-                        : { backgroundColor: fallbackColor(market.id) }
-                    }
+                    className={cn(
+                      'size-20 shrink-0 rounded-xl bg-cover bg-center',
+                      !image && 'brand-pattern',
+                    )}
+                    style={image ? { backgroundImage: `url(${image})` } : undefined}
                     aria-hidden="true"
                   />
                   <div className="min-w-0 flex-1 py-1">
@@ -128,7 +128,7 @@ export function SearchPage() {
               {selected.status === 'OPEN' && (
                 <div className="grid grid-cols-2 gap-3">
                   <Button
-                    className="bg-emerald-500 text-white hover:bg-emerald-600"
+                    className="bg-outcome-yes text-outcome-yes-foreground hover:brightness-95"
                     onClick={() => {
                       setBet({ market: selected, outcome: 'YES' })
                       setSelected(null)
@@ -137,7 +137,7 @@ export function SearchPage() {
                     JA wetten
                   </Button>
                   <Button
-                    className="bg-rose-500 text-white hover:bg-rose-600"
+                    className="bg-outcome-no text-outcome-no-foreground hover:brightness-95"
                     onClick={() => {
                       setBet({ market: selected, outcome: 'NO' })
                       setSelected(null)
