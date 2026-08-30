@@ -36,6 +36,13 @@ export function AppShell() {
   }, [selectUser, userQuery.data])
 
   useEffect(() => {
+    document.body.dataset.appShell = 'true'
+    return () => {
+      delete document.body.dataset.appShell
+    }
+  }, [])
+
+  useEffect(() => {
     if (userQuery.error instanceof ApiError && userQuery.error.status === 404) {
       queryClient.clear()
       logout()
@@ -50,7 +57,7 @@ export function AppShell() {
           className={cn(
             'pointer-events-none absolute inset-x-0 top-0 z-40 flex h-16 items-center justify-between px-4 backdrop-blur-md lg:hidden',
             isFeed
-              ? 'bg-black/45 text-white'
+              ? 'bg-background/45 text-foreground'
               : 'border-b bg-background/90 text-foreground',
           )}
         >
@@ -65,8 +72,8 @@ export function AppShell() {
             <Link
               to="/wallet"
               className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-md',
-                isFeed ? 'border-white/15 bg-black/35' : 'border-border bg-card',
+                'ui-pressable ui-touch-target rounded-full border px-3 py-1.5 text-xs font-medium tabular-nums backdrop-blur-md',
+                isFeed ? 'border-foreground/15 bg-background/35' : 'border-border bg-card',
               )}
             >
               {balanceQuery.data ? formatMoney(balanceQuery.data.balance) : '–'}
@@ -74,7 +81,7 @@ export function AppShell() {
             <Link
               to="/profile"
               aria-label={`Profil von ${user!.username}`}
-              className="grid size-8 place-items-center rounded-full bg-brand text-xs font-bold text-white"
+              className="ui-pressable ui-touch-target grid size-8 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
             >
               {user!.username.slice(0, 2).toUpperCase()}
             </Link>
@@ -86,21 +93,21 @@ export function AppShell() {
               <Link
                 to="/admin"
                 aria-label="Admin-Panel"
-                className="grid size-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="ui-pressable ui-touch-target grid size-9 place-items-center rounded-full text-muted-foreground hover-fine:bg-muted hover-fine:text-foreground"
               >
                 <ShieldCheck className="size-4" aria-hidden="true" />
               </Link>
             )}
             <Link
               to="/wallet"
-              className="rounded-full px-3 py-2 text-xs font-semibold tabular-nums transition-colors hover:bg-muted"
+              className="ui-pressable ui-touch-target rounded-full px-3 py-2 text-xs font-semibold tabular-nums hover-fine:bg-muted"
             >
               {balanceQuery.data ? formatMoney(balanceQuery.data.balance) : '–'}
             </Link>
             <Link
               to="/profile"
               aria-label={`Profil von ${user!.username}`}
-              className="grid size-9 place-items-center rounded-full bg-brand text-xs font-bold text-white"
+              className="ui-pressable ui-touch-target grid size-9 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground"
             >
               {user!.username.slice(0, 2).toUpperCase()}
             </Link>
@@ -110,7 +117,7 @@ export function AppShell() {
           className={cn(
             'h-full',
             isFeed
-              ? 'overflow-hidden bg-[#0d0d0d]'
+              ? 'overflow-hidden bg-background'
               : 'overflow-y-auto bg-background px-4 pb-24 pt-20 lg:px-10 lg:pb-12 lg:pt-24 xl:px-16',
           )}
         >

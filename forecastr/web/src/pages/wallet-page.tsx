@@ -70,7 +70,7 @@ export function WalletPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="ui-page-enter mx-auto max-w-2xl">
       <div className="mb-6">
         <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Guthaben</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Wallet</h1>
@@ -80,7 +80,7 @@ export function WalletPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardDescription className="text-background/60">Verfügbares Guthaben</CardDescription>
-              <CardTitle className="mt-2 text-4xl tracking-tight">{formatMoney(balance.data?.balance)}</CardTitle>
+              <CardTitle className="mt-2 text-4xl tracking-tight tabular-nums">{formatMoney(balance.data?.balance)}</CardTitle>
             </div>
             <WalletCards className="size-8 opacity-60" aria-hidden="true" />
           </div>
@@ -103,6 +103,7 @@ export function WalletPage() {
       <Dialog open={operation !== null} onOpenChange={(open) => !open && closeDialog()}>
         <DialogContent>
           <form
+            aria-busy={updateBalance.isPending}
             onSubmit={(event) => {
               event.preventDefault()
               if (parsedAmount.value && !isOverBalance) {
@@ -125,17 +126,34 @@ export function WalletPage() {
                 placeholder="25,00"
                 value={amount}
                 aria-invalid={Boolean(amount && (parsedAmount.error || isOverBalance))}
+                aria-describedby={
+                  amount && (parsedAmount.error || isOverBalance)
+                    ? 'wallet-amount-error'
+                    : undefined
+                }
                 onChange={(event) => setAmount(event.target.value)}
               />
-              {amount && parsedAmount.error && <p className="text-xs text-destructive">{parsedAmount.error}</p>}
-              {isOverBalance && <p className="text-xs text-destructive">Das Guthaben reicht für diesen Betrag nicht aus.</p>}
+              {amount && parsedAmount.error && (
+                <p id="wallet-amount-error" className="text-xs text-destructive" role="alert">
+                  {parsedAmount.error}
+                </p>
+              )}
+              {isOverBalance && (
+                <p id="wallet-amount-error" className="text-xs text-destructive" role="alert">
+                  Das Guthaben reicht für diesen Betrag nicht aus.
+                </p>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={closeDialog}>
                 Abbrechen
               </Button>
-              <Button type="submit" disabled={!parsedAmount.value || isOverBalance || updateBalance.isPending}>
-                {updateBalance.isPending && <LoaderCircle className="animate-spin" />}
+              <Button
+                type="submit"
+                disabled={!parsedAmount.value || isOverBalance || updateBalance.isPending}
+                aria-busy={updateBalance.isPending}
+              >
+                {updateBalance.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
                 Bestätigen
               </Button>
             </DialogFooter>

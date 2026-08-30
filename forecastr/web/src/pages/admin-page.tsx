@@ -1,9 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { BarChart3, Database, FileUp, Gavel, LoaderCircle, ShieldCheck } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { toast } from 'sonner'
 
-import { PageError, PageLoading } from '@/components/page-state'
+import { EmptyState, PageError, PageLoading } from '@/components/page-state'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -33,7 +43,7 @@ export function AdminPage() {
   const { user } = useSession()
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="ui-page-enter mx-auto max-w-2xl">
       <div className="mb-6 flex items-center gap-3">
         <div className="grid size-10 place-items-center rounded-xl bg-foreground text-background">
           <ShieldCheck className="size-5" aria-hidden="true" />
@@ -139,7 +149,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
     <Card>
       <CardContent className="p-4">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-1 truncate text-lg font-semibold">{value}</p>
+        <p className="mt-1 truncate text-lg font-semibold tabular-nums">{value}</p>
       </CardContent>
     </Card>
   )
@@ -148,6 +158,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 function Resolution({ userId }: { userId: string }) {
   const queryClient = useQueryClient()
   const [selected, setSelected] = useState<Market | null>(null)
+  const [pendingResolution, setPendingResolution] = useState<ManualResolution | null>(null)
   const markets = useQuery({
     queryKey: queryKeys.search('', 'OPEN'),
     queryFn: () => forecastrApi.searchEvents(userId, '', 'OPEN'),
@@ -162,6 +173,7 @@ function Resolution({ userId }: { userId: string }) {
           : `Markt war bereits ${eventStatusLabel(result.status).toLowerCase()}.`,
       )
       setSelected(null)
+      setPendingResolution(null)
       void queryClient.invalidateQueries({ queryKey: queryKeys.stats })
       void queryClient.invalidateQueries({ queryKey: queryKeys.feed })
       void queryClient.invalidateQueries({ queryKey: ['events'] })
@@ -180,10 +192,17 @@ function Resolution({ userId }: { userId: string }) {
     <>
       <div className="space-y-3">
         {markets.data?.length === 0 && (
-          <p className="rounded-xl border p-4 text-sm text-muted-foreground">Es gibt keine offenen Ereignisse.</p>
+          <EmptyState
+            title="Keine offenen Ereignisse"
+            description="Sobald ein Markt geöffnet ist, kannst du ihn hier auflösen."
+          />
         )}
-        {markets.data?.map((market) => (
-          <Card key={market.id}>
+        {markets.data?.map((market, index) => (
+          <Card
+            key={market.id}
+            className="ui-stagger-item"
+            style={{ '--stagger-index': index } as CSSProperties}
+          >
             <CardContent className="flex items-start justify-between gap-3 p-4">
               <div>
                 <p className="font-medium leading-snug">{market.question}</p>
@@ -191,14 +210,30 @@ function Resolution({ userId }: { userId: string }) {
                   JA {formatMoney(market.yesPool)} · NEIN {formatMoney(market.noPool)}
                 </p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => setSelected(market)}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  resolve.reset()
+                  setPendingResolution(null)
+                  setSelected(market)
+                }}
+              >
                 Auflösen
               </Button>
             </CardContent>
           </Card>
         ))}
       </div>
-      <Dialog open={selected !== null} onOpenChange={(open) => !open && setSelected(null)}>
+      <Dialog
+        open={selected !== null && pendingResolution === null}
+        onOpenChange={(open) => {
+          if (!open && pendingResolution === null) {
+            resolve.reset()
+            setSelected(null)
+          }
+        }}
+      >
         <DialogContent>
           {selected && (
             <>
@@ -209,28 +244,62 @@ function Resolution({ userId }: { userId: string }) {
               <p className="text-sm">Das Ergebnis löst Auszahlungen oder Erstattungen aus und kann nicht zurückgenommen werden.</p>
               <div className="grid grid-cols-3 gap-2">
                 <Button
-                  disabled={resolve.isPending}
-                  className="bg-outcome-yes text-outcome-yes-foreground hover:brightness-95"
-                  onClick={() => resolve.mutate('YES')}
+                  className="bg-outcome-yes text-outcome-yes-foreground hover-fine:brightness-95"
+                  onClick={() => setPendingResolution('YES')}
                 >
                   JA
                 </Button>
                 <Button
-                  disabled={resolve.isPending}
-                  className="bg-outcome-no text-outcome-no-foreground hover:brightness-95"
-                  onClick={() => resolve.mutate('NO')}
+                  className="bg-outcome-no text-outcome-no-foreground hover-fine:brightness-95"
+                  onClick={() => setPendingResolution('NO')}
                 >
                   NEIN
                 </Button>
-                <Button variant="outline" disabled={resolve.isPending} onClick={() => resolve.mutate('REFUND')}>
+                <Button variant="outline" onClick={() => setPendingResolution('REFUND')}>
                   Erstatten
                 </Button>
               </div>
-              {resolve.isPending && <LoaderCircle className="mx-auto animate-spin" aria-label="Wird aufgelöst" />}
             </>
           )}
         </DialogContent>
       </Dialog>
+      <AlertDialog
+        open={selected !== null && pendingResolution !== null}
+        onOpenChange={(open) => {
+          if (!open && !resolve.isPending) {
+            setPendingResolution(null)
+          }
+        }}
+      >
+        <AlertDialogContent aria-busy={resolve.isPending}>
+          {selected && pendingResolution && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{resolutionLabel(pendingResolution)} endgültig bestätigen?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Der Markt „{selected.question}“ wird {resolutionDescription(pendingResolution)}.
+                  Diese Aktion löst Zahlungen aus und kann nicht rückgängig gemacht werden.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={resolve.isPending}>Zurück</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  disabled={resolve.isPending}
+                  aria-busy={resolve.isPending}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    resolve.mutate(pendingResolution)
+                  }}
+                >
+                  {resolve.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
+                  Endgültig bestätigen
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
@@ -260,6 +329,7 @@ function ImportEvents({ userId }: { userId: string }) {
       <CardContent>
         <form
           className="space-y-4"
+          aria-busy={mutation.isPending}
           onSubmit={(event) => {
             event.preventDefault()
             mutation.mutate()
@@ -269,13 +339,17 @@ function ImportEvents({ userId }: { userId: string }) {
             <Label htmlFor="import-path">Serverpfad</Label>
             <Input id="import-path" value={path} placeholder="Leer = Standards" onChange={(event) => setPath(event.target.value)} />
           </div>
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending && <LoaderCircle className="animate-spin" />}
+          <Button type="submit" disabled={mutation.isPending} aria-busy={mutation.isPending}>
+            {mutation.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
             Importieren
           </Button>
         </form>
         {mutation.data && (
-          <div className="mt-5 rounded-xl bg-muted p-4 text-sm">
+          <div
+            className="admin-import-result mt-5 rounded-xl bg-muted p-4 text-sm"
+            role="status"
+            aria-live="polite"
+          >
             <p>
               {mutation.data.accepted} übernommen · {mutation.data.skipped} übersprungen ·{' '}
               {mutation.data.rejected} abgelehnt
@@ -349,7 +423,12 @@ function SeedUsers({ userId }: { userId: string }) {
         <CardDescription>Optional werden pro Konto direkt Wetten erzeugt.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4" onSubmit={submit}>
+        <form
+          className="space-y-4"
+          onSubmit={submit}
+          aria-busy={mutation.isPending}
+          aria-describedby={error ? 'seed-users-error' : undefined}
+        >
           <div className="grid grid-cols-2 gap-3">
             <Field label="Anzahl Konten" id="seed-user-count" value={count} onChange={setCount} />
             <Field label="Wetten pro Konto" id="seed-user-bets" value={betsPerUser} onChange={setBetsPerUser} />
@@ -360,9 +439,9 @@ function SeedUsers({ userId }: { userId: string }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Ergebnis</Label>
+              <Label htmlFor="seed-user-outcome">Ergebnis</Label>
               <Select value={outcome} onValueChange={(value) => setOutcome(value as 'RANDOM' | Outcome)} disabled={betsPerUser === '0'}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="seed-user-outcome"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="RANDOM">Zufällig</SelectItem>
                   <SelectItem value="YES">JA</SelectItem>
@@ -372,9 +451,13 @@ function SeedUsers({ userId }: { userId: string }) {
             </div>
             <Field label="Einsatz (optional)" id="seed-stake" value={stake} onChange={setStake} disabled={betsPerUser === '0'} decimal />
           </div>
-          {error && <p className="text-xs text-destructive">{error}</p>}
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending && <LoaderCircle className="animate-spin" />}
+          {error && (
+            <p id="seed-users-error" className="text-xs text-destructive" role="alert">
+              {error}
+            </p>
+          )}
+          <Button type="submit" disabled={mutation.isPending} aria-busy={mutation.isPending}>
+            {mutation.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
             Konten erzeugen
           </Button>
         </form>
@@ -410,6 +493,8 @@ function SeedEvents({ userId }: { userId: string }) {
       <CardContent>
         <form
           className="space-y-4"
+          aria-busy={mutation.isPending}
+          aria-describedby={error ? 'seed-events-error' : undefined}
           onSubmit={(event) => {
             event.preventDefault()
             const parsedCount = positiveInteger(count)
@@ -425,9 +510,13 @@ function SeedEvents({ userId }: { userId: string }) {
             <Field label="Anzahl Ereignisse" id="seed-event-count" value={count} onChange={setCount} />
             <Field label="Laufzeit (Min.)" id="seed-event-lifetime" value={lifetime} onChange={setLifetime} />
           </div>
-          {error && <p className="text-xs text-destructive">{error}</p>}
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending && <LoaderCircle className="animate-spin" />}
+          {error && (
+            <p id="seed-events-error" className="text-xs text-destructive" role="alert">
+              {error}
+            </p>
+          )}
+          <Button type="submit" disabled={mutation.isPending} aria-busy={mutation.isPending}>
+            {mutation.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
             Ereignisse erzeugen
           </Button>
         </form>
@@ -490,4 +579,18 @@ function eventStatusText(status: string): string {
     ARCHIVED: 'Archiviert',
   }
   return labels[status] ?? status
+}
+
+function resolutionLabel(resolution: ManualResolution): string {
+  if (resolution === 'REFUND') {
+    return 'Erstattung'
+  }
+  return resolution === 'YES' ? 'JA' : 'NEIN'
+}
+
+function resolutionDescription(resolution: ManualResolution): string {
+  if (resolution === 'REFUND') {
+    return 'endgültig erstattet'
+  }
+  return `endgültig mit ${resolutionLabel(resolution)} aufgelöst`
 }

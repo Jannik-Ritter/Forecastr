@@ -22,8 +22,16 @@ type Celebrate = (amount: Money) => void
 
 const CelebrationContext = createContext<Celebrate | null>(null)
 
+const confettiColors = [
+  'var(--outcome-yes)',
+  'var(--brand)',
+  'color-mix(in oklch, var(--outcome-yes) 55%, white)',
+  'color-mix(in oklch, var(--brand) 55%, white)',
+  'var(--primary)',
+]
+
 const confetti = Array.from({ length: 32 }, (_, index) => ({
-  color: ['#34d399', '#fbbf24', '#fb7185', '#38bdf8', '#a78bfa'][index % 5],
+  color: confettiColors[index % confettiColors.length],
   delay: `${(index % 8) * 0.08}s`,
   drift: `${((index * 37) % 180) - 90}px`,
   duration: `${1.8 + (index % 5) * 0.18}s`,
@@ -42,7 +50,11 @@ export function CelebrationProvider({ children }: { children: ReactNode }) {
     if (dismissTimer.current !== undefined) {
       window.clearTimeout(dismissTimer.current)
     }
-    dismissTimer.current = window.setTimeout(() => setCelebration(null), 3_200)
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    dismissTimer.current = window.setTimeout(
+      () => setCelebration(null),
+      reduceMotion ? 2_000 : 3_200,
+    )
   }, [])
 
   useEffect(
@@ -72,7 +84,7 @@ export function useCelebration(): Celebrate {
 
 function WinCelebration({ amount }: { amount: Money }) {
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100] grid place-items-center overflow-hidden px-4">
+      <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
       <div className="absolute inset-0 motion-reduce:hidden" aria-hidden="true">
         {confetti.map((piece, index) => (
           <span
@@ -91,19 +103,21 @@ function WinCelebration({ amount }: { amount: Money }) {
           />
         ))}
       </div>
-      <div
-        className="win-celebration-card rounded-3xl border border-outcome-yes/40 bg-[#0d0d0d] px-8 py-7 text-center text-white shadow-2xl"
-        role="status"
-        aria-live="polite"
-      >
-        <span className="mx-auto grid size-14 place-items-center rounded-full bg-outcome-yes text-outcome-yes-foreground">
-          <PartyPopper className="size-7" aria-hidden="true" />
-        </span>
-        <p className="mt-4 text-sm font-medium tracking-widest text-outcome-yes uppercase">
-          Gewonnen
-        </p>
-        <p className="mt-1 text-3xl font-semibold tracking-tight">{formatMoney(amount)}</p>
-        <p className="mt-2 text-sm text-white/65">Dein Gewinn wurde gutgeschrieben.</p>
+      <div className="app-overlay-frame absolute inset-y-0 right-0 grid place-items-center px-4">
+        <div
+          className="win-celebration-card rounded-3xl border border-outcome-yes/40 bg-foreground px-8 py-7 text-center text-background shadow-2xl"
+          role="status"
+          aria-live="polite"
+        >
+          <span className="mx-auto grid size-14 place-items-center rounded-full bg-outcome-yes text-outcome-yes-foreground">
+            <PartyPopper className="size-7" aria-hidden="true" />
+          </span>
+          <p className="mt-4 text-sm font-medium tracking-widest text-outcome-yes uppercase">
+            Gewonnen
+          </p>
+          <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">{formatMoney(amount)}</p>
+          <p className="mt-2 text-sm text-background/65">Dein Gewinn wurde gutgeschrieben.</p>
+        </div>
       </div>
     </div>
   )

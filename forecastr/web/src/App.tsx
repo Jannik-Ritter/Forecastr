@@ -60,9 +60,9 @@ function App() {
             </BrowserRouter>
             <Toaster
               position="bottom-center"
+              gap={12}
               offset={24}
               mobileOffset={{ bottom: 88, left: 16, right: 16 }}
-              richColors
             />
           </CelebrationProvider>
         </SessionProvider>

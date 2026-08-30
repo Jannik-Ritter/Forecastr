@@ -68,7 +68,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
+    <div className="ui-page-enter mx-auto max-w-2xl space-y-5">
       <div>
         <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Konto</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Profil</h1>
@@ -149,8 +149,9 @@ export function ProfilePage() {
                 <AlertDialogAction
                   onClick={() => deleteAccount.mutate()}
                   disabled={deleteAccount.isPending}
+                  aria-busy={deleteAccount.isPending}
                 >
-                  {deleteAccount.isPending && <LoaderCircle className="animate-spin" />}
+                  {deleteAccount.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
                   Löschen
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -162,6 +163,7 @@ export function ProfilePage() {
       <Dialog open={isRenaming} onOpenChange={setIsRenaming}>
         <DialogContent>
           <form
+            aria-busy={rename.isPending}
             onSubmit={(event) => {
               event.preventDefault()
               if (username.trim()) {
@@ -187,8 +189,12 @@ export function ProfilePage() {
               <Button type="button" variant="outline" onClick={() => setIsRenaming(false)}>
                 Abbrechen
               </Button>
-              <Button type="submit" disabled={!username.trim() || rename.isPending}>
-                {rename.isPending && <LoaderCircle className="animate-spin" />}
+              <Button
+                type="submit"
+                disabled={!username.trim() || rename.isPending}
+                aria-busy={rename.isPending}
+              >
+                {rename.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
                 Speichern
               </Button>
             </DialogFooter>
