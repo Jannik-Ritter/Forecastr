@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Search } from 'lucide-react'
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 
 import { BetDrawer } from '@/components/bet-drawer'
 import { EmptyState, PageError, PageLoading } from '@/components/page-state'
@@ -36,7 +36,7 @@ export function SearchPage() {
   })
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="ui-page-enter mx-auto max-w-2xl">
       <div className="mb-6">
         <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Märkte</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Suchen</h1>
@@ -74,11 +74,17 @@ export function SearchPage() {
         {results.data?.length === 0 && (
           <EmptyState title="Keine Treffer" description="Für diesen Suchbegriff gibt es keine Märkte." />
         )}
-        {results.data?.map((market) => {
+        {results.data?.map((market, index) => {
           const image = imageFor(market.id)
           return (
-            <button key={market.id} type="button" onClick={() => setSelected(market)} className="w-full text-left">
-              <Card className="overflow-hidden p-0 transition-transform hover:-translate-y-0.5">
+            <button
+              key={market.id}
+              type="button"
+              onClick={() => setSelected(market)}
+              className="ui-stagger-item ui-list-pressable group w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              style={{ '--stagger-index': index } as CSSProperties}
+            >
+              <Card className="overflow-hidden p-0 transition-colors duration-150 ease-[var(--ease-out)] group-hover-fine:bg-muted/40">
                 <CardContent className="flex gap-3 p-3">
                   <div
                     className={cn(
@@ -93,7 +99,7 @@ export function SearchPage() {
                       {eventStatusLabel(market.status)}
                     </Badge>
                     <p className="line-clamp-2 font-medium leading-snug">{market.question}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">
+                    <p className="mt-2 text-xs text-muted-foreground tabular-nums">
                       JA {formatMoney(market.yesPool)} · NEIN {formatMoney(market.noPool)}
                     </p>
                   </div>
@@ -118,17 +124,17 @@ export function SearchPage() {
               <div className="grid grid-cols-2 gap-3 rounded-xl bg-muted p-3 text-sm">
                 <div>
                   <p className="text-xs text-muted-foreground">JA-Pool</p>
-                  <p className="mt-1 font-medium">{formatMoney(selected.yesPool)}</p>
+                  <p className="mt-1 font-medium tabular-nums">{formatMoney(selected.yesPool)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">NEIN-Pool</p>
-                  <p className="mt-1 font-medium">{formatMoney(selected.noPool)}</p>
+                  <p className="mt-1 font-medium tabular-nums">{formatMoney(selected.noPool)}</p>
                 </div>
               </div>
               {selected.status === 'OPEN' && (
                 <div className="grid grid-cols-2 gap-3">
                   <Button
-                    className="bg-outcome-yes text-outcome-yes-foreground hover:brightness-95"
+                    className="bg-outcome-yes text-outcome-yes-foreground hover-fine:brightness-95"
                     onClick={() => {
                       setBet({ market: selected, outcome: 'YES' })
                       setSelected(null)
@@ -137,7 +143,7 @@ export function SearchPage() {
                     JA wetten
                   </Button>
                   <Button
-                    className="bg-outcome-no text-outcome-no-foreground hover:brightness-95"
+                    className="bg-outcome-no text-outcome-no-foreground hover-fine:brightness-95"
                     onClick={() => {
                       setBet({ market: selected, outcome: 'NO' })
                       setSelected(null)

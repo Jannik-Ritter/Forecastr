@@ -89,14 +89,18 @@ export function BetDrawer({ market, outcome, open, onOpenChange }: BetDrawerProp
         }
       }}
     >
-      <DrawerContent className="lg:left-[calc(50%_+_7.5rem)] lg:right-auto lg:w-120 lg:-translate-x-1/2">
-        <form onSubmit={submit} className="mx-auto w-full max-w-md">
+      <DrawerContent>
+        <form
+          onSubmit={submit}
+          className="mx-auto w-full max-w-md"
+          aria-busy={mutation.isPending}
+        >
           <DrawerHeader>
             <DrawerTitle>
               {outcomeLabel(outcome)} auf „{market.question}“
             </DrawerTitle>
-            <DrawerDescription>
-              Verfügbar: {formatMoney(balanceQuery.data?.balance)}
+            <DrawerDescription className="tabular-nums">
+              Verfügbar: {balanceQuery.isSuccess ? formatMoney(balanceQuery.data.balance) : '–'}
             </DrawerDescription>
           </DrawerHeader>
           <div className="space-y-4 px-4">
@@ -109,13 +113,18 @@ export function BetDrawer({ market, outcome, open, onOpenChange }: BetDrawerProp
                 placeholder="10,00"
                 value={amount}
                 aria-invalid={Boolean(error)}
+                aria-describedby={error ? 'bet-amount-error' : undefined}
                 onChange={(event) => setAmount(event.target.value)}
               />
-              {error && <p className="text-xs text-destructive">{error}</p>}
+              {error && (
+                <p id="bet-amount-error" className="text-xs text-destructive" role="alert">
+                  {error}
+                </p>
+              )}
             </div>
             <div className="rounded-xl bg-muted p-3">
               <p className="text-xs text-muted-foreground">Möglicher Nettogewinn</p>
-              <p className="mt-1 text-xl font-semibold">{formatMoney(profit)}</p>
+              <p className="mt-1 text-xl font-semibold tabular-nums">{formatMoney(profit)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Nach 5 % Gebühr auf den Gewinn. Dein Einsatz ist nicht enthalten.
               </p>
@@ -126,13 +135,14 @@ export function BetDrawer({ market, outcome, open, onOpenChange }: BetDrawerProp
               type="submit"
               size="lg"
               disabled={!parsedAmount.value || isOverBalance || mutation.isPending}
+              aria-busy={mutation.isPending}
               className={
                 outcome === 'YES'
-                  ? 'bg-outcome-yes text-outcome-yes-foreground hover:brightness-95'
-                  : 'bg-outcome-no text-outcome-no-foreground hover:brightness-95'
+                  ? 'bg-outcome-yes text-outcome-yes-foreground tabular-nums hover-fine:brightness-95'
+                  : 'bg-outcome-no text-outcome-no-foreground tabular-nums hover-fine:brightness-95'
               }
             >
-              {mutation.isPending && <LoaderCircle className="animate-spin" aria-hidden="true" />}
+              {mutation.isPending && <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />}
               {formatMoney(parsedAmount.value)} auf {outcomeLabel(outcome)} setzen
             </Button>
             <DrawerClose asChild>

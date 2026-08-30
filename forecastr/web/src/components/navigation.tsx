@@ -16,7 +16,7 @@ export function MobileNavigation() {
   return (
     <nav
       aria-label="Hauptnavigation"
-      className="absolute inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 flex h-16 items-center justify-around rounded-2xl border border-white/10 bg-[#0d0d0d]/85 px-1 text-white shadow-2xl backdrop-blur-xl lg:hidden"
+      className="absolute inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-40 flex h-16 items-center justify-around rounded-2xl border border-border bg-card/85 px-1 text-foreground shadow-2xl backdrop-blur-xl lg:hidden"
     >
       {destinations.map((destination) => (
         <NavigationLink key={destination.to} {...destination} compact />
@@ -27,7 +27,7 @@ export function MobileNavigation() {
 
 export function DesktopNavigation() {
   return (
-    <aside className="hidden h-dvh w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-3 py-5 text-sidebar-foreground lg:flex">
+    <aside className="hidden h-dvh w-(--app-sidebar-width) shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-3 py-5 text-sidebar-foreground lg:flex">
       <Link to="/feed" aria-label="Forecastr Feed" className="mb-8 px-3 py-1 text-[1.65rem]">
         <BrandLogo />
       </Link>
@@ -61,17 +61,17 @@ function NavigationLink({
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex items-center rounded-xl transition-colors',
+          'ui-pressable flex items-center rounded-xl',
           compact
-            ? 'h-14 min-w-14 flex-col justify-center gap-1 px-2 text-[0.65rem]'
+            ? 'h-14 min-w-14 flex-col justify-center gap-1 px-2 text-xs'
             : 'h-11 gap-3 px-4 text-sm font-medium',
           isActive
             ? compact
-              ? 'text-brand'
-              : 'bg-sidebar-accent text-brand'
+              ? 'text-accent-foreground'
+              : 'bg-sidebar-accent text-sidebar-accent-foreground'
             : compact
-              ? 'text-white/60 hover:text-white'
-              : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground',
+              ? 'text-muted-foreground hover-fine:text-foreground'
+              : 'text-muted-foreground hover-fine:bg-sidebar-accent hover-fine:text-sidebar-foreground',
         )
       }
     >

@@ -4,8 +4,13 @@ import { Button } from '@/components/ui/button'
 
 export function PageLoading({ label = 'Wird geladen …' }: { label?: string }) {
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center gap-3 text-muted-foreground">
-      <LoaderCircle className="size-6 animate-spin" aria-hidden="true" />
+    <div
+      className="flex min-h-64 flex-col items-center justify-center gap-3 text-muted-foreground"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <LoaderCircle className="size-6 animate-spin motion-reduce:animate-none" aria-hidden="true" />
       <p>{label}</p>
     </div>
   )
@@ -13,7 +18,10 @@ export function PageLoading({ label = 'Wird geladen …' }: { label?: string }) 
 
 export function PageError({ error, retry }: { error: Error; retry: () => void }) {
   return (
-    <div className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 text-center">
+    <div
+      className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 text-center"
+      role="alert"
+    >
       <AlertCircle className="size-7 text-destructive" aria-hidden="true" />
       <div>
         <p className="font-medium">Das hat nicht funktioniert.</p>

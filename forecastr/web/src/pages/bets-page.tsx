@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { RefreshCw } from 'lucide-react'
+import type { CSSProperties } from 'react'
 
 import { EmptyState, PageError, PageLoading } from '@/components/page-state'
 import { Badge } from '@/components/ui/badge'
@@ -43,14 +44,14 @@ export function BetsPage() {
   })
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="ui-page-enter mx-auto max-w-2xl">
       <div className="mb-6 flex items-end justify-between">
         <div>
           <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Portfolio</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight">Meine Wetten</h1>
         </div>
         <Button size="icon" variant="outline" aria-label="Wetten aktualisieren" onClick={() => void bets.refetch()}>
-          <RefreshCw className={bets.isFetching ? 'animate-spin' : ''} aria-hidden="true" />
+          <RefreshCw className={bets.isFetching ? 'animate-spin motion-reduce:animate-none' : ''} aria-hidden="true" />
         </Button>
       </div>
 
@@ -72,8 +73,12 @@ export function BetsPage() {
                   {betStatusLabel(status)} · {grouped.length}
                 </h2>
                 <div className="space-y-3">
-                  {grouped.map(({ bet, market }) => (
-                    <Card key={bet.id}>
+                  {grouped.map(({ bet, market }, index) => (
+                    <Card
+                      key={bet.id}
+                      className="ui-stagger-item"
+                      style={{ '--stagger-index': index } as CSSProperties}
+                    >
                       <CardContent className="space-y-3 p-4">
                         <div className="flex items-start justify-between gap-3">
                           <p className="font-medium leading-snug">
@@ -82,8 +87,8 @@ export function BetsPage() {
                           <Badge
                             className={
                               bet.outcome === 'YES'
-                                ? 'bg-outcome-yes/15 text-green-700 dark:text-outcome-yes'
-                                : 'bg-outcome-no/15 text-red-700 dark:text-outcome-no'
+                                ? 'bg-outcome-yes/15 text-outcome-yes-text'
+                                : 'bg-outcome-no/15 text-outcome-no dark:text-outcome-no-text'
                             }
                           >
                             {outcomeLabel(bet.outcome)}
@@ -92,7 +97,7 @@ export function BetsPage() {
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
                             <p className="text-xs text-muted-foreground">Einsatz</p>
-                            <p className="mt-1 font-medium">{formatMoney(bet.stake)}</p>
+                            <p className="mt-1 font-medium tabular-nums">{formatMoney(bet.stake)}</p>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">Platziert</p>
@@ -105,15 +110,15 @@ export function BetsPage() {
                           </p>
                         )}
                         {bet.status === 'WON' && (
-                          <p className="text-sm text-green-700 dark:text-outcome-yes">
+                          <p className="text-sm text-outcome-yes-text tabular-nums">
                             Ausgezahlt {formatMoney(bet.payoutAmount)} · Gebühr {formatMoney(bet.feeAmount)}
                           </p>
                         )}
                         {bet.status === 'LOST' && (
-                          <p className="text-sm text-muted-foreground">Auszahlung {formatMoney('0.00')}</p>
+                          <p className="text-sm text-muted-foreground tabular-nums">Auszahlung {formatMoney('0.00')}</p>
                         )}
                         {bet.status === 'REFUNDED' && (
-                          <p className="text-sm text-muted-foreground">Erstattet {formatMoney(bet.payoutAmount)}</p>
+                          <p className="text-sm text-muted-foreground tabular-nums">Erstattet {formatMoney(bet.payoutAmount)}</p>
                         )}
                       </CardContent>
                     </Card>
